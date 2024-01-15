@@ -1,0 +1,53 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "es2019",
+    "skipLibCheck": true,
+    "types": ["node"],
+    "lib": ["es6", "es2017", "esnext.asynciterable", "dom", "es2015", "es2016"],
+    "typeRoots": ["node_modules/@types", "types"],
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "pretty": true,
+    "sourceMap": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "allowJs": true,
+    "noEmit": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "importHelpers": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      "@controllers/*": ["controllers/*"],
+      "@databases": ["databases"],
+      "@exceptions/*": ["exceptions/*"],
+      "@interfaces/*": ["interfaces/*"],
+      "@validations/*": ["validations/*"],
+      "@middlewares/*": ["middlewares/*"],
+      "@models/*": ["models/*"],
+      "@routes/*": ["routes/*"],
+      "@services/*": ["services/*"],
+      "@utils/*": ["utils/*"],
+      "@connections/*": ["connections/*"],
+      "@config/*":["config/*"]
+    }
+  },
+  "include": [
+    "src/*.ts",
+    "src/**/*.ts",
+    "src/**/*.json",
+    ".env",
+    "src/middlewares/authentication.middleware.ts",
+    "src/connections/db.connection.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "./build/**/*" // This is what fixed it!
+]
+}
