@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE iccxml SYSTEM "iccxml.dtd">
+<iccxml
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:epub="http://www.idpf.org/2007/ops"
+	xmlns:m="http://www.w3.org/1998/Math/MathML">
+	<head>
+		<title>2021 Virginia Existing Building Code</title>
+		<link href="newICCStylesheet.css" rel="Stylesheet" type="text/css"/>
+	</head>
+	<body epub:type="bodymatter">
+		<section id="VAEBC2021P1" class="volume" epub:type="volume">
+			<section id="VAEBC2021P1_frontmatter" class="frontmatter" epub:type="frontmatter">
+				<section id="VAEBC2021P1_TOC">
+					<nav class="table_of_contents" epub:type="toc">
+						<h1 class="frontmatter_title" epub:type="title">TABLE OF CONTENTS</h1>
+						<div class="toc nomark">
+							<div class="toc_level_1">
+								<p>
+									<span class="label">CHAPTER </span>
+									<span class="ordinal">1</span>
+									<span class="text"> ADMINISTRATION </span>
+									<span class="locator">
+										<a class="toc_pages" href="#VAEBC2021P1_Ch01">1-1</a>
+									</span>
+								</p>
+								<p>
+									<span class="content_left">Section</span>
+								</p>
+								<div class="toc nomark">
+									<div class="toc_level_2">
+										<p>
+											<span class="ordinal">101</span>
+											<span class="text">General </span>
+											<span class="locator">
+												<a class="toc_pages" href="#VAEBC2021P1_Ch01_Sec101">1-1</a>
+											</span>
+										</p>
+										<p>
+											<span class="ordinal">102</span>
+											<span class="text">Purpose and Scope </span>
+											<span class="locator">
+												<a class="toc_pages" href="#VAEBC2021P1_Ch01_Sec102">1-2</a>
+											</span>
+										</p>
+										<p>
+											<span class="ordinal">103</span>
+											<span class="text">Application of Code </span>
+											<span class="locator">
+												<a class="toc_pages" href="#VAEBC2021P1_Ch01_Sec103">1-3</a>
+											</span>
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+				</section>
+			</section>
+		</section>
+	</body>
+</iccxml>

@@ -388,8 +388,8 @@
 <Sect/>
 </Sect>
 </Part>
-
 <Part>
+<TOC title="TOC">
 <H2 id="LinkTarget_903">TABLE OF CONTENTS </H2>
 
 <Sect>
@@ -456,6 +456,7 @@
 
 <P>Section 1401 General . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .14-1 1402 Evaluation Process . . . . . . . . . . . . . . . . . . . . . . .14-1 1403 Evaluation Data. . . . . . . . . . . . . . . . . . . . . . . . . .14-1 1404 Evaluation Scores . . . . . . . . . . . . . . . . . . . . . . . .14-8 </P>
 
+</TOC>
 <P>APPENDIX A GUIDELINES FOR THE SEISMIC RETROFIT OF EXISTING BUILDINGS . . . . . . . . .APPENDIX A-1 </P>
 
 <P>CHAPTER A1 SEISMIC STRENGTHENING PROVISIONS FOR UNREINFORCED MASONRY BEARING WALL BUILDINGS . . . . . . . . .APPENDIX A-1 </P>
