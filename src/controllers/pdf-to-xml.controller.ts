@@ -8,13 +8,16 @@ import { parseString, Builder } from 'xml2js';
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 import * as util from 'util';
-
+import { findTOC } from '@utils/findTableOfContent'
 declare module 'express' {
     interface Request {
         file: { [key: string]: UploadedFile[] };
     }
 }
 
+interface TOCObject {
+    [key: string]: any;
+}
 class PdfToXmlController {
     public convertXml = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -79,16 +82,18 @@ class PdfToXmlController {
                 const bookAllData = result['TaggedPDF-doc'];
                 const bookTitle = result['TaggedPDF-doc']["P"] ? result['TaggedPDF-doc']["P"][0]["_"] : "NO DATA";
 
-
-
+                const tocData: TOCObject | null = findTOC(result['TaggedPDF-doc']);
+                // console.log({toc})
+                // res.status(200).send(result);
+                
                 if (paragraphs) {
-                    const tocData = paragraphs.find((value) => {
-                        console.log({ value })
-                        if (value["TOC"]) {
-                            return value.TOC;
-                        }
+                    // const tocData = paragraphs.find((value) => {
+                    //     console.log({ value })
+                    //     if (value["TOC"]) {
+                    //         return value.TOC;
+                    //     }
 
-                    });
+                    // });
                     console.log({ tocData })
 
                     const resultArray = [];
@@ -208,7 +213,7 @@ class PdfToXmlController {
                                 const chapterName = parts.length > 1 ? parts[1].trim() : null;
                                 // const section = prepareSectionContent(heading);
                                 const sectionData = prepareSectionContent(heading)
-                               const sectionView = sectionData.join('');
+                               const sectionView = sectionData?.join('');
                                 console.log("SECTION VIEW =====",sectionView);
                                const textvalue = `<div class="toc nomark"><div class="toc_level_1"><p><span class="label">CHAPTER </span><span class="ordinal">${chapterNumber} </span><span class="text"> ${chapterName}</span><span class="locator"><a class="toc_pages" href="#VAEBC2021P1_Ch01">1-1</a></span></p><p><span class="content_left">Section</span></p><div class="toc nomark">${sectionView}</div></div></div>`
                                                                 
@@ -241,7 +246,7 @@ class PdfToXmlController {
                         }
                     }
                     
-                    const chapterAndSectionXML = prepareTableOfContent().join('');
+                    const chapterAndSectionXML = prepareTableOfContent()?.join('');
 
                     const finalXML = `
                     <?xml version="1.0" encoding="UTF-8"?>
