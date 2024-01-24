@@ -26,3 +26,28 @@ export function findTOC(obj: NestedObject): TOCObject | null {
 
     return null;
 }
+
+
+
+type AnyObject = {
+    [key: string]: any;
+};
+
+export function removeTOC(obj: AnyObject): AnyObject {
+    if (!obj || typeof obj !== 'object') {
+        return obj;
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(removeTOC);
+    }
+
+    const newObj: AnyObject = {};
+    for (const key in obj) {
+        if (key !== 'TOC') {
+            newObj[key] = removeTOC(obj[key]);
+        }
+    }
+
+    return newObj;
+}

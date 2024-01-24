@@ -8,7 +8,7 @@ import { parseString, Builder } from 'xml2js';
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 import * as util from 'util';
-import { findTOC } from '@utils/findTableOfContent'
+import { findTOC, removeTOC } from '@utils/findTableOfContent'
 declare module 'express' {
     interface Request {
         file: { [key: string]: UploadedFile[] };
@@ -59,7 +59,7 @@ class PdfToXmlController {
         try {
             // res.status(200).send("<h1>PDF TO XML</h1>")
             // console.log("REQ FILE 1 ========", req);
-            console.log("REQ FILE 2 ========", req.file);
+            // console.log("REQ FILE 2 ========", req.file);
             const uploadedFile = req.file as UploadedFile;
             if (!uploadedFile) {
                 return res.status(400).json({ error: 'No  file uploaded.' });
@@ -75,14 +75,17 @@ class PdfToXmlController {
                     console.error('Error parsing XML:', err);
                     return;
                 }
-                console.log("Ressult ===============> ", JSON.stringify(result));
+                // console.log("Ressult ===============> ", JSON.stringify(result));
 
                 const paragraphs = result['TaggedPDF-doc']["Part"];
-                console.log("JSON.stringify(paragraphs)=============", JSON.stringify(paragraphs));
+                // console.log("JSON.stringify(paragraphs)=============", JSON.stringify(paragraphs));
                 const bookAllData = result['TaggedPDF-doc'];
                 const bookTitle = result['TaggedPDF-doc']["P"] ? result['TaggedPDF-doc']["P"][0]["_"] : "NO DATA";
 
                 const tocData: TOCObject | null = findTOC(result['TaggedPDF-doc']);
+                const withoutTOC: TOCObject | null = removeTOC(result['TaggedPDF-doc']);
+                
+                
                 // console.log({toc})
                 // res.status(200).send(result);
                 
@@ -95,6 +98,8 @@ class PdfToXmlController {
 
                     // });
                     console.log({ tocData })
+                    console.log({ withoutTOC })
+
 
                     const resultArray = [];
                     function processPValues(data) {
@@ -125,6 +130,7 @@ class PdfToXmlController {
 
                     }
 
+                    console.log({ resultArray })
                     processPValues(tocData.TOC);
 
 
@@ -182,6 +188,7 @@ class PdfToXmlController {
 
                     const tableData = makingReadableTableContent(resultArray)
                     //Making seprate array fro chapter
+                    console.log({tableData})
                     const { chapters, indices } = makingChapter(tableData)
                     //Split Original array by help of the chapter indexes
                     const updatedData = splitArrayByIndices(indices, tableData)
@@ -201,7 +208,7 @@ class PdfToXmlController {
                     function prepareTableOfContent()  {
                         if (newAarray?.length > 0) {
                            return newAarray?.map((heading) => {
-                                console.log({heading})
+                                // console.log({heading})
                                const match = heading?.chapter.match(/\d+/);
 
                                 // Extract the captured number
@@ -214,7 +221,7 @@ class PdfToXmlController {
                                 // const section = prepareSectionContent(heading);
                                 const sectionData = prepareSectionContent(heading)
                                const sectionView = sectionData?.join('');
-                                console.log("SECTION VIEW =====",sectionView);
+                                // console.log("SECTION VIEW =====",sectionView);
                                const textvalue = `<div class="toc nomark"><div class="toc_level_1"><p><span class="label">CHAPTER </span><span class="ordinal">${chapterNumber} </span><span class="text"> ${chapterName}</span><span class="locator"><a class="toc_pages" href="#VAEBC2021P1_Ch01">1-1</a></span></p><p><span class="content_left">Section</span></p><div class="toc nomark">${sectionView}</div></div></div>`
                                                                 
                                 return textvalue;
@@ -224,13 +231,13 @@ class PdfToXmlController {
                         }
                     };
                     
-                    console.log("prepareTableOfContent() ============>",prepareTableOfContent());
+                    // console.log("prepareTableOfContent() ============>",prepareTableOfContent());
 
                     function prepareSectionContent(heading) {
                         if (heading?.sections.length >0 ){
                             
                             return heading.sections.map((sec) => {
-                                console.log("========+++++SECCCCC++++++++",sec)
+                                // console.log("========+++++SECCCCC++++++++",sec)
                                 if(sec.length > 1){
                                     const match = sec.match(/\b\d+\b/);
                                     const secNumber = match ? match[0] : "No Data";
@@ -238,7 +245,7 @@ class PdfToXmlController {
                                     const secName = sec ? sec.split(/\b\d+\b/)[1].trim() : 'No data'
 
                                     const secValue =`<div class="toc_level_2"><p><span class="ordinal">${secNumber} </span><span class="text"> ${secName} </span><span class="locator"> <a class="toc_pages" href="#VAEBC2021P1_Ch01_Sec101">1-1</a></span></p></div>`
-                                    console.log({ secValue })
+                                    // console.log({ secValue })
                                     return secValue;
                                 }
                                 
