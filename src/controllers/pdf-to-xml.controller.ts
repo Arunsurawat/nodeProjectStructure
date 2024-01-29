@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 import * as util from 'util';
 import { findTOC, removeTOC } from '@utils/findTableOfContent'
+import { generateChapterSection } from "@/utils/chapaterSection";
 declare module 'express' {
     interface Request {
         file: { [key: string]: UploadedFile[] };
@@ -77,17 +78,15 @@ class PdfToXmlController {
                 }
                 // console.log("Ressult ===============> ", JSON.stringify(result));
 
-                const paragraphs = result['TaggedPDF-doc']["Part"];
+                const paragraphs = result['TaggedPDF-doc'];
                 // console.log("JSON.stringify(paragraphs)=============", JSON.stringify(paragraphs));
                 const bookAllData = result['TaggedPDF-doc'];
-                const bookTitle = result['TaggedPDF-doc']["P"] ? result['TaggedPDF-doc']["P"][0]["_"] : "NO DATA";
+                // const bookTitle = result['TaggedPDF-doc']["P"] ? result['TaggedPDF-doc']["P"][0]["_"] : "NO DATA";
 
                 const tocData: TOCObject | null = findTOC(result['TaggedPDF-doc']);
                 const withoutTOC: TOCObject | null = removeTOC(result['TaggedPDF-doc']);
-                
-                
-                // console.log({toc})
-                // res.status(200).send(result);
+               
+               
                 
                 if (paragraphs) {
                     // const tocData = paragraphs.find((value) => {
@@ -98,7 +97,7 @@ class PdfToXmlController {
 
                     // });
                     console.log({ tocData })
-                    console.log({ withoutTOC })
+                    //console.log({ withoutTOC })
 
 
                     const resultArray = [];
@@ -148,7 +147,7 @@ class PdfToXmlController {
 
                         //Removing the dots after the string
                         outputArray = outputArray.map(function (element) {
-                            return element.replace(/[.]/g, '').trim();
+                            return element.replace(/[.]/g, '')?.trim();
                         })
                         return outputArray;
                     }
@@ -205,6 +204,47 @@ class PdfToXmlController {
                     }
                     
                     console.log({newAarray})
+                    
+                    const tagPallData = withoutTOC["P"];
+                    const allChapterWithSection = newAarray;
+                    
+
+                    // Array to store matched chapters and their content
+                    const AllChapterData = [];
+
+                    // Variable to track the current chapter being processed
+                    let currentChapter = null;
+
+                    // Iterate through tagPallData
+                    tagPallData.forEach(tagData => {
+                        if (typeof tagData === 'object' && tagData._ && tagData._.startsWith('CHAPTER')) {
+                            // If it's a chapter, update the currentChapter variable
+                            currentChapter = tagData._;
+                        }
+
+                        // Check if the currentChapter is in newArray
+                        const matchingChapter = allChapterWithSection.find(newChapter => currentChapter?.includes(extractChapter(newChapter.chapter)));
+
+                        // If a match is found, push the entire content to the AllChapterData array
+                        if (matchingChapter) {
+                            AllChapterData.push(tagData);
+                        }
+                    });
+
+                    // Display the matched chapters with content
+                    console.log({ AllChapterData });
+
+                    function extractChapter(inputString) {
+                        // Use a regular expression to match "CHAPTER" followed by a space and one or more digits
+                        const match = inputString.match(/\bCHAPTER \d+\b/);
+
+                        // Check if a match is found and return it, or return null if no match
+                        console.log(match[0])
+                        return match ? match[0] : null;
+                    }
+                    
+                    
+                    
                     function prepareTableOfContent()  {
                         if (newAarray?.length > 0) {
                            return newAarray?.map((heading) => {
@@ -217,7 +257,7 @@ class PdfToXmlController {
                                 const parts = heading?.chapter.split(/\d+/);
 
                                // Extract the part after the number
-                                const chapterName = parts.length > 1 ? parts[1].trim() : null;
+                                const chapterName = parts.length > 1 ? parts[1]?.trim() : null;
                                 // const section = prepareSectionContent(heading);
                                 const sectionData = prepareSectionContent(heading)
                                const sectionView = sectionData?.join('');
@@ -242,7 +282,7 @@ class PdfToXmlController {
                                     const match = sec.match(/\b\d+\b/);
                                     const secNumber = match ? match[0] : "No Data";
 
-                                    const secName = sec ? sec.split(/\b\d+\b/)[1].trim() : 'No data'
+                                    const secName = sec ? sec.split(/\b\d+\b/)[1]?.trim() : 'No data'
 
                                     const secValue =`<div class="toc_level_2"><p><span class="ordinal">${secNumber} </span><span class="text"> ${secName} </span><span class="locator"> <a class="toc_pages" href="#VAEBC2021P1_Ch01_Sec101">1-1</a></span></p></div>`
                                     // console.log({ secValue })
@@ -254,7 +294,7 @@ class PdfToXmlController {
                     }
                     
                     const chapterAndSectionXML = prepareTableOfContent()?.join('');
-
+                    const generateChapter = generateChapterSection(AllChapterData)
                     const finalXML = `
                     <?xml version="1.0" encoding="UTF-8"?>
                         <!DOCTYPE iccxml SYSTEM "iccxml.dtd">
@@ -263,7 +303,7 @@ class PdfToXmlController {
                             xmlns:epub="http://www.idpf.org/2007/ops"
                             xmlns:m="http://www.w3.org/1998/Math/MathML">
                             <head>
-                                <title>${bookTitle}</title>
+                                <title>{bookTitle}</title>
                                 <link href="newICCStylesheet.css" rel="Stylesheet" type="text/css"/>
                             </head>
                             <body epub:type="bodymatter">
@@ -275,6 +315,7 @@ class PdfToXmlController {
                                                 ${chapterAndSectionXML}
                                             </nav>
                                         </section>
+                                        ${generateChapter}
                                     </section>
                                 </section>
                             </body>
