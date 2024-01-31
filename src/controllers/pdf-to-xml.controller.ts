@@ -96,7 +96,7 @@ class PdfToXmlController {
                     //     }
 
                     // });
-                    console.log({ tocData })
+                    // console.log({ tocData })
                     //console.log({ withoutTOC })
 
 
@@ -129,7 +129,7 @@ class PdfToXmlController {
 
                     }
 
-                    console.log({ resultArray })
+                    // console.log({ resultArray })
                     processPValues(tocData.TOC);
 
 
@@ -187,7 +187,7 @@ class PdfToXmlController {
 
                     const tableData = makingReadableTableContent(resultArray)
                     //Making seprate array fro chapter
-                    console.log({tableData})
+                    // console.log({tableData})
                     const { chapters, indices } = makingChapter(tableData)
                     //Split Original array by help of the chapter indexes
                     const updatedData = splitArrayByIndices(indices, tableData)
@@ -203,46 +203,81 @@ class PdfToXmlController {
                         )
                     }
                     
-                    console.log({newAarray})
+                    // console.log({newAarray})
                     
                     const tagPallData = withoutTOC["P"];
                     const allChapterWithSection = newAarray;
                     
-
+                    // console.log({ tagPallData })
                     // Array to store matched chapters and their content
                     const AllChapterData = [];
 
                     // Variable to track the current chapter being processed
                     let currentChapter = null;
+                    
+                    function isChapterString(str) {
+                        if (typeof str === 'string'){
+                            const trimStr = str.trim();
+                            // Define a regular expression pattern to match the desired format
+                            const pattern = /^Chapter\s*\d+\s*[^\d]+$/;
 
+                            // Use the test method to check if the string matches the pattern
+                            return pattern.test(trimStr);
+                        }
+                        
+                    }
+                    
+
+                    function extractChapter(inputString) {
+                        const trimStr = inputString.trim();
+                        // Use a regular expression to match "CHAPTER" followed by a space and one or more digits
+                        const match = trimStr.match(/\bChapter\s?(?:\d+)?[^\d]+/i);
+
+                        // Check if a match is found and return it, or return null if no match
+                        // console.log("inputString.match(/\bChapter(?: \d+)? [^\d]+/) ===", match ? match[0] : null)
+                        return match ? match[0] : null;
+                    }
                     // Iterate through tagPallData
                     tagPallData.forEach(tagData => {
                         if (typeof tagData === 'object' && tagData._ && tagData._.startsWith('CHAPTER')) {
                             // If it's a chapter, update the currentChapter variable
                             currentChapter = tagData._;
+                        }else{
+                            if (isChapterString(tagData)){
+                                if (tagData?.length < 100){
+                                    currentChapter = tagData;
+                                }
+                               
+                            }
                         }
-
+                        
                         // Check if the currentChapter is in newArray
-                        const matchingChapter = allChapterWithSection.find(newChapter => currentChapter?.includes(extractChapter(newChapter.chapter)));
-
+                
+                       
+                        
+                        const matchingChapter = allChapterWithSection.find(newChapter => {
+                            
+                            if (typeof newChapter.chapter === 'string' && typeof currentChapter === 'string')
+                            {
+                                const extractedChapter = extractChapter(newChapter.chapter).toLowerCase();
+                                const updateCurrentChapter = currentChapter?.trim().toLowerCase();
+                                return updateCurrentChapter && extractedChapter.includes(updateCurrentChapter)
+                            }
+                          
+                           
+                            
+                        });
+                      
+                        
                         // If a match is found, push the entire content to the AllChapterData array
                         if (matchingChapter) {
+                            console.log({ tagData })
                             AllChapterData.push(tagData);
                         }
                     });
 
-                    // Display the matched chapters with content
-                    console.log({ AllChapterData });
+                   
 
-                    function extractChapter(inputString) {
-                        // Use a regular expression to match "CHAPTER" followed by a space and one or more digits
-                        const match = inputString.match(/\bCHAPTER \d+\b/);
-
-                        // Check if a match is found and return it, or return null if no match
-                        console.log(match[0])
-                        return match ? match[0] : null;
-                    }
-                    
                     
                     
                     function prepareTableOfContent()  {
@@ -294,7 +329,9 @@ class PdfToXmlController {
                     }
                     
                     const chapterAndSectionXML = prepareTableOfContent()?.join('');
-                    const generateChapter = generateChapterSection(AllChapterData)
+                    // console.log({ AllChapterData })
+                    const generateChapter = generateChapterSection(AllChapterData).join('');
+                    // console.log({ generateChapter })
                     const finalXML = `
                     <?xml version="1.0" encoding="UTF-8"?>
                         <!DOCTYPE iccxml SYSTEM "iccxml.dtd">
@@ -320,7 +357,7 @@ class PdfToXmlController {
                                 </section>
                             </body>
                     </iccxml>`;
-                    console.log({ finalXML })
+                    // console.log({ finalXML })
                     res.status(200).send(finalXML);
 
                     
