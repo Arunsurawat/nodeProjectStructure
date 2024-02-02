@@ -10,6 +10,7 @@ import * as xml2js from 'xml2js';
 import * as util from 'util';
 import { findTOC, removeTOC } from '@utils/findTableOfContent'
 import { generateChapterSection } from "@/utils/chapaterSection";
+import { generateAllDataArray } from "@/utils/generateAllDataArray";
 declare module 'express' {
     interface Request {
         file: { [key: string]: UploadedFile[] };
@@ -330,7 +331,8 @@ class PdfToXmlController {
                     
                     const chapterAndSectionXML = prepareTableOfContent()?.join('');
                     // console.log({ AllChapterData })
-                    const generateChapter = generateChapterSection(AllChapterData).join('');
+                    // const generateChapter = generateChapterSection(AllChapterData);
+                    const generatedChapter = generateAllDataArray(AllChapterData)?.join('');
                     // console.log({ generateChapter })
                     const finalXML = `
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -352,7 +354,7 @@ class PdfToXmlController {
                                                 ${chapterAndSectionXML}
                                             </nav>
                                         </section>
-                                        ${generateChapter}
+                                        ${generatedChapter}
                                     </section>
                                 </section>
                             </body>
