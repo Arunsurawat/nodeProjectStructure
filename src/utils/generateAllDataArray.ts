@@ -23,14 +23,26 @@ export function generateAllDataArray(chapterArray:any) {
 
   // Iterate through the chapterArray
   chapterArray.forEach((line, index) => {
-    const chapterHeadingInNextLine = line.match(chapterRegex)
-      ? chapterArray[index + 1]
-      : "no data";
-    const chapterMatch = line.match(chapterRegex);
-    const sectionMatch = line.match(sectionRegex);
-    const subSectionMatch = line.match(subSectionRegex);
-    const partMatch = line.match(partRegex);
-    const userNoteMatch = line.match(userNoteRegex) && chapterArray[index + 1];
+    const containsChapterResult = hasChapter(line);
+    let chapterHeadingInNextLine = "no data";
+    let chapterMatch;
+  
+    if (typeof line === 'object' && containsChapterResult) {
+      chapterHeadingInNextLine = chapterArray[index + 1]
+      chapterMatch = line._.match(chapterRegex);
+    }else {
+      chapterMatch = typeof line === 'string' && line.match(chapterRegex);
+      chapterHeadingInNextLine = typeof line === 'string' && line.match(chapterRegex)
+        ? chapterArray[index + 1]
+        : "no data";
+
+    }
+    
+    // const chapterMatch = line.match(chapterRegex);
+    const sectionMatch = typeof line === 'string' && line.match(sectionRegex);
+    const subSectionMatch = typeof line === 'string' &&  line.match(subSectionRegex);
+    const partMatch = typeof line === 'string' && line.match(partRegex);
+    const userNoteMatch = typeof line === 'string' && line.match(userNoteRegex) && chapterArray[index + 1];
 
     if (chapterMatch) {
       // If a chapter is found, create a new chapter object
@@ -99,11 +111,13 @@ export function generateAllDataArray(chapterArray:any) {
 
 
 function generateUserNotes(currentChapter){
-    if(currentChapter.userNote){
+    if(currentChapter?.userNote){
         return `<p>
                     <span class="label">User note:</span>
                     <span class="formal_usage">${currentChapter.userNote}</span>
                 </p>`
+    }else {
+      return ''
     }
 }
 
@@ -132,6 +146,8 @@ function generateSections(currentChapter) {
                 <span class="level1_title" epub:type="title">${data.heading}</span>
             </h1>`;
     });
+  }else{
+    return ''
   }
 }
 
@@ -143,5 +159,12 @@ function generateSubSections(currentChapter) {
                 <span class="level2_title" epub:type="title">${data.heading}.</span>
             </h1>`;
     });
+  }else {
+    return ''
   }
+}
+
+function hasChapter(dataObject) {
+  const chapterText = dataObject._ || ''; // Extract the text value from the object
+  return /\bCHAPTER\b/.test(chapterText); // Check if the word "CHAPTER" is present in the text
 }
