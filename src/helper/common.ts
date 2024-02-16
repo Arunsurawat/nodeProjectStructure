@@ -13,7 +13,7 @@ export function getAllPTagData(withoutTOC:any){
         }
     }
 
-    console.log({ getAllPTag });
+    // console.log("getAllPTag========", getAllPTag);
     return getAllPTag;
 }
 
@@ -24,7 +24,7 @@ export function removeNumber(originalObject){
         modifiedArray.push({ [modifiedKey]: originalObject[key] });
     }
 
-    console.log(modifiedArray);
+    // console.log(modifiedArray);
     return modifiedArray;
 }
 
@@ -153,6 +153,13 @@ export function configrationCheck(text) {
 }
 
 export function unescapeXml(str) {
+    return str.replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'");
+}
+export function unescapeXmlTOValid(str) {
     return str.replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&')

@@ -79,8 +79,8 @@ export function generateTocContent(data:any) {
 function generateChapter(chapter: any) {
     let result = '';
     for (const ChapValue in chapter) {
-        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", chapter)
-        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", ChapValue)
+        // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", chapter)
+        // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", ChapValue)
 
         if (configrationCheck(ChapValue) === "CHAPTER") {
             const text = chapter[ChapValue]?.trim();
@@ -105,15 +105,15 @@ function generateSection(data: any) {
     let result = ''; // Initialize an empty string to accumulate the generated HTML
 
     for (const chapter in data) {
-        console.log("#####################################chapter in data######", chapter, data);
+        // console.log("#####################################chapter in data######", chapter, data);
 
         if (configrationCheck(chapter) === "SECTION") {
             const sectionArray = data[chapter];
-            console.log({ sectionArray })
+            // console.log({ sectionArray })
 
             if (Array.isArray(sectionArray)) {
                 for (const ChapValue of sectionArray) {
-                    console.log("_____________________", ChapValue);
+                    // console.log("_____________________", ChapValue);
                     const data = typeof ChapValue === 'string' && ChapValue?.trim();
                     const text = data.includes('Section') ? data : `Section ${data}`
                     const heading = text.split(" ")[0];
@@ -132,7 +132,7 @@ function generateSection(data: any) {
                 }
             } else {
                 const sectionHeading = data[chapter];
-                console.log("_____________________", sectionHeading);
+                // console.log("_____________________", sectionHeading);
 
                 const text = typeof sectionHeading === 'string' && sectionHeading?.trim();
                 const heading = text.split(" ")[0].includes('Section') ? text.split(" ")[0] : 'Section';

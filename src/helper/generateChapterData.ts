@@ -1,4 +1,4 @@
-import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, configrationCheck, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml } from "./common";
+import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, configrationCheck, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid } from "./common";
 
 export function generateChapterData(chapterArray: any, originalDataObject:any) {
 
@@ -44,50 +44,10 @@ export function generateChapterData(chapterArray: any, originalDataObject:any) {
         })
     });
     // console.log("======verifiedData=====> ", verifiedData)
-
-    
-    
-    
     // return verifiedData;
     
     
     // const output = checkAndUpdate(originalObject, chapterArray)
-    
-    // function checkAndUpdate(originalObject, allBookData) {
-    //     const finalArray = [];
-    //     const groupedData = [];
-    //     let tempData = [];
-    //     for (let i = 0; i < allBookData.length; i++) {
-    //         const line = allBookData[i]
-    //         const lineVaue = typeof line === 'string' && line?.trim();
-    //         // console.log("-------",line);
-    //         for (let key of originalObject) {
-    //             const getObjValue = Object.keys(key)[0].trim();
-    //             if (typeof lineVaue === 'string' && getObjValue){
-    //                 if (lineVaue.split(" ")[0] === getObjValue) {
-    //                     if (lineVaue.startsWith("CHAPTER") || lineVaue.startsWith("SUBCHAPTER")) {
-    //                         if (tempData.length > 0) {
-    //                             groupedData.push(tempData);
-    //                             tempData = []; // Reset tempData for the next group
-    //                         }
-    //                     }
-    //                     tempData.push(lineVaue);
-    //                     finalArray.push(lineVaue);
-    //                     break;
-    //                 } 
-    //             }
-                
-    //         }
-    //     }
-    //     console.log("finalArray =====",finalArray)
-    //     if (tempData.length > 0) {
-    //         groupedData.push(tempData);
-    //     }
-    //     return groupedData;
-    // }
-    
-    // return output
-    
     
     
     const generatedXml =  verifiedData?.length > 0 && verifiedData.map((currentChapter, index) => {
@@ -103,40 +63,10 @@ export function generateChapterData(chapterArray: any, originalDataObject:any) {
         const result = currentChapter.map((ChapValue,index) => {
             const getXML = generateXml(ChapValue);
             return getXML;
-           
-            //  return generatedSectionXml;
-            //  if (configrationCheck(ChapValue.key) === "APPENDIX") {
-            //      const chapterNumber = ChapValue.key.split(" ")[1];
-            //      const chapterHeading = ChapValue.key.split(" ")[0];
-            //      console.log({ chapterNumber });
-            //      console.log({ chapterHeading });
-            //      let chapterContent = ''
-            //      if (ChapValue.value.length > 200) {
-            //          chapterContent = '';
-            //      } else {
-            //          chapterContent = `<span class="chapter_title" epub:type="title"> ${ChapValue.value}</span>`
-            //      }
-            //      generatedChapterXml = `
-            //             <header>
-            //                 <h1 class="chapter" epub:type="title">
-            //                     <span class="label" epub:type="label">${chapterHeading}</span>
-            //                     <span class="chapter_number" epub:type="ordinal">${chapterNumber}</span>
-            //                     <br />
-            //                     ${chapterContent}
-            //                 </h1>
-            //             </header>
-            //             `
-            // }
-        
         })
         return result.join('');
-        // console.log({ generatedSectionXml })
-        
-         
-
-            
     })
-    return generatedXml.join('');
+    return generatedXml
 
     
 
@@ -186,9 +116,10 @@ function generateParts(currentChapter) {
 
 function generateContent(content) {
     if (content?.length > 0) {
+        // console.log({ content })
         const result = content.map((data, index) => {
-            if(data) {
-                const sanitizedItem = unescapeXml(data);
+            if (data !== 'false') {
+                const sanitizedItem = unescapeXmlTOValid(data);
                 const generatedData = `<section id="VAEBC2021P1_Ch01_Sec101.1" class="level2">
                                     <p>${sanitizedItem}</p>
                                     </section>`;
@@ -215,30 +146,41 @@ function generateSubSections(subSections) {
 
 function generateChapter(ChapValue:any){
     if (configrationCheck(ChapValue.key) === "CHAPTER" || configrationCheck(ChapValue.key) === "APPENDIX" || configrationCheck(ChapValue.key) === "PART" ) {
-        console.log({ ChapValue })
         const chapterNumber = configrationCheck(ChapValue.key) === "PART" ? ChapValue.key.split(" ")[1].split("")[0]:ChapValue.key.split(" ")[1];
         const makePartNumber = configrationCheck(ChapValue.key) === "PART" ? ChapValue.key.split(" ")[0] +' '+ chapterNumber : ChapValue.key.split(" ")[1] 
         const chapterHeading = configrationCheck(ChapValue.key) === "PART" ? ChapValue.key.split(chapterNumber)[1]: ChapValue.key.split(" ")[0];
-        console.log("@@@@@@@@@@@@@@@@@");
-        console.log({ chapterNumber });
-        console.log({ chapterHeading });
-        console.log("@@@@@@@@@@@@@@@@@");
+        // console.log("@@@@@@@@@@@@@@@@@");
+        // console.log({ chapterNumber });
+        // console.log({ chapterHeading });
+        // console.log("@@@@@@@@@@@@@@@@@");
 
         
         const generatedContent = generateContent(ChapValue.value);
 
         const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
-        return `
+        if (configrationCheck(ChapValue.key) === "PART" ){
+            return `<header>
+                <h1 class="chapter" epub:type="title">
+                <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
+                <span class="label" epub:type="label">${chapterHeading}</span>
+                    <br />
+                    
+                </h1>
+            </header>
+            ${removetheComma}`
+        }else {
+            return `
             <header>
                 <h1 class="chapter" epub:type="title">
-                    <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
                     <span class="label" epub:type="label">${chapterHeading}</span>
+                    <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
                     <br />
                     
                 </h1>
             </header>
             ${removetheComma}
             `
+        }
     }
 }
 

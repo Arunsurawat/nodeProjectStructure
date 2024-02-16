@@ -28,9 +28,9 @@ class PdfToXmlController {
         try {
             // res.status(200).send("<h1>PDF TO XML</h1>")
             // console.log("REQ FILE 1 ========", req);
-            console.log("REQ FILE 2 ========", req.file);
+            // console.log("REQ FILE 2 ========", req.file);
             const uploadedFile = req.file as UploadedFile;
-            console.log({ uploadedFile })
+            // console.log({ uploadedFile })
             if (!uploadedFile) {
                 return res.status(400).json({ error: 'No file uploaded.' });
             }
@@ -80,7 +80,15 @@ class PdfToXmlController {
                     return;
                 }
                 // Replace <H1>, <H2>, <H3>, <H4>, <H5>, and <H6> tags with <P> tags
-                let modifiedData = data.replace(/<\s*(\/)?\s*(H[1-6])(\s+[^>]*)?>/g, (match, p1, p2) => {
+                // let modifiedData = data.replace(/<\s*(\/)?\s*(H[1-6])(\s+[^>]*)?>/g, (match, p1, p2) => {
+                //     if (p1 === '/') {
+                //         return '</P>'; // Closing tag
+                //     } else {
+                //         return '<P>'; // Opening tag
+                //     }
+                // });
+                // Replace <H1>, <H2>, <H3>, <H4>, <H5>, and <H6>, <P>, <L>, <LI>, <Lbl>, and <LBody> tags
+                let modifiedData = data.replace(/<\s*(\/)?\s*(H[1-6]|Lbl|LBody|Div)(\s+[^>]*)?>/g, (match, p1, p2) => {
                     if (p1 === '/') {
                         return '</P>'; // Closing tag
                     } else {
@@ -92,9 +100,12 @@ class PdfToXmlController {
 
 
                 // Remove the <Sect> and </Sect> tags and <Sect />
-                const pattern = /<Sect\s*\/?>|<\/Sect>/g;
+                // const pattern = /<Sect\s*\/?>|<\/Sect>/g;
+                const pattern = /<Sect\s*\/?>|<\/Sect>|<L\s*\/?>|<\/L>|<LI\s*\/?>|<\/LI>/g;
+
                 modifiedData = modifiedData.replace(pattern, '');
 
+                
            
             
             
@@ -147,7 +158,7 @@ class PdfToXmlController {
                             return segment.split(' ').slice(1).join(' ');
                         }
                     });
-
+                    console.log({ outputArray })
                     outputArray = outputArray.length > 0 && outputArray.map(function (element) {
                         // Remove periods and commas from the result
                         element = element.replace("TABLE OF CONTENTS ", "").trim();
@@ -209,11 +220,11 @@ class PdfToXmlController {
 // ------------------------------------------------------------------------------------------
 
 
-                    const generatedChapterData = generateChapterData(withoutTOCAllPTagData, finalTocArray)
+                const generatedChapterData:any = generateChapterData(withoutTOCAllPTagData, finalTocArray)
 
-                    // console.log("generatedChapterData===", generatedChapterData)
-                    // res.status(200).send(finalTocArray);
-                    // res.status(200).send(generatedChapterData);
+                // console.log("generatedChapterData===", generatedChapterData)
+                // res.status(200).send(finalTocArray);
+                // res.status(200).send(generatedChapterData);
                 
                     
                 
@@ -221,271 +232,11 @@ class PdfToXmlController {
                 // new apparoach end
 
                 
-                
-                
-                // if (paragraphs) {
-                //     // const tocData = paragraphs.find((value) => {
-                //     //     console.log({ value })
-                //     //     if (value["TOC"]) {
-                //     //         return value.TOC;
-                //     //     }
-
-                //     // });
-                //     // console.log({ tocData })
-                //     //console.log({ withoutTOC })
-
-
-                //     const resultArray = [];
-                //     function processPValues(data) {
-                //         function recursiveProcess(data, isFirstSectP) {
-                //             if (data && typeof data === 'object') {
-                //                 if (Array.isArray(data)) {
-                //                     for (const item of data) {
-                //                         recursiveProcess(item, isFirstSectP);
-                //                     }
-                //                 } else {
-                //                     for (const key in data) {
-                //                         if (key === "P" && Array.isArray(data[key])) {
-                //                             // Remove objects from "P" values
-                //                             const filteredP = data[key].filter(value => typeof value !== 'object');
-                //                             if (isFirstSectP) {
-                //                                 resultArray.unshift(...filteredP);
-                //                             } else {
-                //                                 resultArray.push(...filteredP);
-                //                             }
-                //                         }
-                //                         recursiveProcess(data[key], key === "Sect" && !isFirstSectP);
-                //                     }
-                //                 }
-                //             }
-                //         }
-
-                //         recursiveProcess(data, false);
-
-                //     }
-
-                //     // console.log({ resultArray })
-                //     processPValues(tocData.TOC);
-
-
-                //     //Making readable table content
-
-
-                //     function makingReadableTableContent(data) {
-                //         const newData = data.join()
-                //         //Split string from table index like 1-1
-                //         let outputArray = newData.split(/(?=\d+-\d+)/);
-                //         //Removing the table indexes from the array
-                //         outputArray = outputArray.map(function (element) {
-                //             return element.replace(/^\d+-\d+\s*/, '');
-                //         }).filter((result) => result != '');
-
-                //         //Removing the dots after the string
-                //         outputArray = outputArray.map(function (element) {
-                //             return element.replace(/[.]/g, '')?.trim();
-                //         })
-                //         return outputArray;
-                //     }
-
-                //     function makingChapter(originalArray) {
-                //         let indices = []
-                //         //Making seprate array fro chapter
-                //         let chapters = originalArray.filter((element, index) => {
-                //             if (element.includes("CHAPTER")) {
-                //                 indices.push(index)
-                //             }
-                //             return element.includes("CHAPTER")
-                //         })
-
-                //         return {
-                //             chapters,
-                //             indices
-                //         }
-                //     }
-
-                //     function splitArrayByIndices(indices, originalArray) {
-                //         let resultArrays = [];
-                //         let startIndex = indices[0];
-
-                //         for (let index of indices) {
-                //             if (index != 0) {
-                //                 resultArrays.push(originalArray.slice(startIndex + 1, index));
-                //             }
-
-                //             startIndex = index;
-                //         }
-
-                //         resultArrays.push(originalArray.slice(startIndex + 1));
-
-                //         return resultArrays;
-                //     }
-
-                //     const tableData = makingReadableTableContent(resultArray)
-                //     //Making seprate array fro chapter
-                //     // console.log({tableData})
-                //     const { chapters, indices } = makingChapter(tableData)
-                //     //Split Original array by help of the chapter indexes
-                //     const updatedData = splitArrayByIndices(indices, tableData)
-
-                //     //Preparing updated array of chapter
-                //     const newAarray = []
-                //     for (let i = 0; i < chapters.length; i++) {
-                //         newAarray.push(
-                //             {
-                //                 chapter: chapters[i].replace(/,/g, ''),
-                //                 sections: updatedData[i]
-                //             }
-                //         )
-                //     }
-
-                //     // console.log({newAarray})
-
-                //     const tagPallData = withoutTOC["P"];
-                //     const allChapterWithSection = newAarray;
-
-                //     // console.log({ tagPallData })
-                //     // Array to store matched chapters and their content
-                //     const AllChapterData = [];
-
-                //     // Variable to track the current chapter being processed
-                //     let currentChapter = null;
-
-                //     function isChapterString(str) {
-                //         if (typeof str === 'string'){
-                //             const trimStr = str.trim();
-                //             // Define a regular expression pattern to match the desired format
-                //             const pattern = /^Chapter\s*\d+\s*[^\d]+$/;
-
-                //             // Use the test method to check if the string matches the pattern
-                //             return pattern.test(trimStr);
-                //         }
-
-                //     }
-
-
-                //     function extractChapter(inputString) {
-                //         const trimStr = inputString.trim();
-                //         // Use a regular expression to match "CHAPTER" followed by a space and one or more digits
-                //         const match = trimStr.match(/\bChapter\s?(?:\d+)?[^\d]+/i);
-
-                //         // Check if a match is found and return it, or return null if no match
-                //         // console.log("inputString.match(/\bChapter(?: \d+)? [^\d]+/) ===", match ? match[0] : null)
-                //         return match ? match[0] : null;
-                //     }
-                //     // Iterate through tagPallData
-                //     tagPallData.forEach(tagData => {
-                //         if (typeof tagData === 'object' && tagData._ && tagData._.startsWith('CHAPTER')) {
-                //             // If it's a chapter, update the currentChapter variable
-                //             currentChapter = tagData._;
-                //         }else{
-                //             if (isChapterString(tagData)){
-                //                 if (tagData?.length < 100){
-                //                     currentChapter = tagData;
-                //                 }
-
-                //             }
-                //         }
-
-                //         // Check if the currentChapter is in newArray
-
-
-
-                //         const matchingChapter = allChapterWithSection.find(newChapter => {
-
-                //             if (typeof newChapter.chapter === 'string' && typeof currentChapter === 'string')
-                //             {
-                //                 const extractedChapter = extractChapter(newChapter.chapter).toLowerCase();
-                //                 const updateCurrentChapter = currentChapter?.trim().toLowerCase();
-                //                 return updateCurrentChapter && extractedChapter.includes(updateCurrentChapter)
-                //             }
-
-
-
-                //         });
-
-
-                //         // If a match is found, push the entire content to the AllChapterData array
-                //         if (matchingChapter) {
-                //             console.log({ tagData })
-                //             AllChapterData.push(tagData);
-                //         }
-                //     });
-
-
-
-
-                    // function prepareTableOfContent()  {
-                    //     if (newAarray?.length > 0) {
-                    //        return newAarray?.map((heading) => {
-                    //             // console.log({heading})
-                    //            const match = heading?.chapter.match(/\d+/);
-
-                    //             // Extract the captured number
-                    //            const chapterNumber = match ? match[0] : null;
-
-                    //             const parts = heading?.chapter.split(/\d+/);
-
-                    //            // Extract the part after the number
-                    //             const chapterName = parts.length > 1 ? parts[1]?.trim() : null;
-                    //             // const section = prepareSectionContent(heading);
-                    //             const sectionData = prepareSectionContent(heading)
-                    //            const sectionView = sectionData?.join('');
-                    //             // console.log("SECTION VIEW =====",sectionView);
-                    //            const textvalue = `<div class="toc nomark"><div class="toc_level_1"><p><span class="label">CHAPTER </span><span class="ordinal">${chapterNumber} </span><span class="text"> ${chapterName}</span><span class="locator"><a class="toc_pages" href="#VAEBC2021P1_Ch01">1-1</a></span></p><p><span class="content_left">Section</span></p><div class="toc nomark">${sectionView}</div></div></div>`
-
-                    //             return textvalue;
-
-
-                    //         })
-                    //     }
-                    // };
-
-                    // console.log("prepareTableOfContent() ============>",prepareTableOfContent());
-
-                    // function prepareSectionContent(heading) {
-                    //     if (heading?.sections.length >0 ){
-
-                    //         return heading.sections.map((sec) => {
-                    //             // console.log("========+++++SECCCCC++++++++",sec)
-                    //             if(sec.length > 1){
-                    //                 const match = sec.match(/\b\d+\b/);
-                    //                 const secNumber = match ? match[0] : "No Data";
-
-                    //                 const secName = sec ? sec.split(/\b\d+\b/)[1]?.trim() : 'No data'
-
-                    //                 const secValue =`<div class="toc_level_2"><p><span class="ordinal">${secNumber} </span><span class="text"> ${secName} </span><span class="locator"> <a class="toc_pages" href="#VAEBC2021P1_Ch01_Sec101">1-1</a></span></p></div>`
-                    //                 // console.log({ secValue })
-                    //                 return secValue;
-                    //             }
-
-                    //         })
-                    //     }
-                    // }
-
-                    // const chapterAndSectionXML = prepareTableOfContent()?.join('');
-
-                    // console.log({ AllChapterData })
-                    // const generateChapter = generateChapterSection(AllChapterData);
-                    // const generatedChapter = generateAllDataArray(AllChapterData)?.join('');
-                    // console.log({ generateChapter })
-
-                    /*
-                    const newArray: any = [
-                        {
-                            CHAPTER: "CHAPTER 1 ADMINISTRATION",
-                            SECTION: "Section 1401 General",
-                            PART: "PART I PARTAdmin",
-                            APPENDIX: "APPENDIX CHAPTER 1",
-                        },
-                        {
-                            CHAPTER: "CHAPTER 2 ADMINISTRATION",
-                            SECTION: "Section 1401 General",
-                            PART: "PART I PARTAdmin",
-                            APPENDIX: "APPENDIX CHAPTER 1 appendixHeading",
-                        }]
-                    
-                    */
-                    const generatedTOC =" generateTocContent(finalTocArray).join()"
+                    const generatedTOC =generateTocContent(finalTocArray).join();
+                    // console.log("*******************", generatedChapterData)
+                    // const snatizeXml = generatedChapterData && generatedChapterData.forEach(element => {
+                    //     return element.unescapeXml;
+                    // });
                     const finalXML = `
                     <?xml version="1.0" encoding="UTF-8"?>
                         <!DOCTYPE iccxml SYSTEM "iccxml.dtd">
