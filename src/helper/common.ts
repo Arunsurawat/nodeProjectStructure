@@ -167,6 +167,14 @@ export function unescapeXmlTOValid(str) {
         .replace(/&apos;/g, "'");
 }
 
+export function convertOperatoresToXML(str){
+    return str.replace(/&/g, '&amp;')
+        .replace(/</g, '\&lt;')
+        .replace(/>/g, '\&gt;')
+        .replace(/"/g, '\&quot;')
+        .replace(/'/g, '\&apos;')
+}
+
 // export const originalDataObject = {
 //     "PART0": "Part I—Administrative",
 //     "CHAPTER1": "CHAPTER 1 SCOPE AND ADMINISTRATION   1-1 DIVISION I—CALIFORNIA ADMINISTRATION",

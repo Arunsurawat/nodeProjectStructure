@@ -1,4 +1,4 @@
-import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, configrationCheck, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid } from "./common";
+import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, configrationCheck, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid } from "./common";
 
 export function generateChapterData(chapterArray: any, originalDataObject:any) {
 
@@ -44,7 +44,7 @@ export function generateChapterData(chapterArray: any, originalDataObject:any) {
         })
     });
     // console.log("======verifiedData=====> ", verifiedData)
-    // return verifiedData;
+    // return { "chapterArray": ChaptersArray, "originalObject": originalObject, "verifiedData": verifiedData };
     
     
     // const output = checkAndUpdate(originalObject, chapterArray)
@@ -60,9 +60,22 @@ export function generateChapterData(chapterArray: any, originalDataObject:any) {
         // let generatedSectionXml = '';
         
 
-        const result = currentChapter.map((ChapValue,index) => {
-            const getXML = generateXml(ChapValue);
-            return getXML;
+
+        const result = currentChapter.map((ChapValue) => {
+            if (configrationCheck(ChapValue.key) === "CHAPTER"){
+                const getXML = generateXml(ChapValue);
+                if(index === 0){
+                    
+                    return `<section id="VAEBC2021P1_Ch01" class="chapter" epub: type = "chapter" > ${getXML} `;
+                }else{
+                    return `</section> <section id="VAEBC2021P1_Ch01" class="chapter" epub: type = "chapter" > ${getXML}`;
+                }
+            }else {
+                const generatedSectionXml = generateSection(ChapValue);
+                console.log({ generatedSectionXml });
+                const removetheComma = Array.isArray(generatedSectionXml) ? generatedSectionXml.join() : generatedSectionXml;
+                return removetheComma;
+            }
         })
         return result.join('');
     })
@@ -74,16 +87,16 @@ export function generateChapterData(chapterArray: any, originalDataObject:any) {
 function generateXml(ChapValue){
     // console.log('__________________________________:',ChapValue)
     const generatedChapterXml = generateChapter(ChapValue) ? generateChapter(ChapValue) : '';
-    const generatedSectionXml = generateSection(ChapValue) ? generateSection(ChapValue) : '';
+    // const generatedSectionXml = generateSection(ChapValue) ? generateSection(ChapValue) : '';
 
     // const generatedAppendixXml = generateAppendix(ChapValue) ? generateAppendix(ChapValue) :'';
     // const removetheCommaForChap = generatedChapterXml.join() ;
     // const removetheCommaForSec = generatedSectionXml.join() ;
-    if (generatedChapterXml || generatedSectionXml) {
-        const generatedXml = `<section id="VAEBC2021P1_Ch01" class="chapter" epub:type="chapter">
+    if (generatedChapterXml ) {
+        const generatedXml = `
                         ${generatedChapterXml}
-                        ${generatedSectionXml}
-                    </section>`
+                       
+                    `
         return generatedXml;
     }
 }
@@ -114,22 +127,42 @@ function generateParts(currentChapter) {
     }
 }
 
-function generateContent(content) {
+function generateChapContent(content) {
     if (content?.length > 0) {
         // console.log({ content })
         const result = content.map((data, index) => {
-            if (data !== 'false') {
-                const sanitizedItem = unescapeXmlTOValid(data);
-                const generatedData = `<section id="VAEBC2021P1_Ch01_Sec101.1" class="level2">
-                                    <p>${sanitizedItem}</p>
-                                    </section>`;
-                
-                return generatedData; 
+            if(index > 1){
+                if (data !== 'false') {
+                    const sanitizedItem = convertOperatoresToXML(data);
+                    const generatedData = `<p>${sanitizedItem}</p>`;
+
+                    return generatedData;
+                }
             }
+            
             
         });
         return result.join('');
     } 
+}
+
+function generateContent(content) {
+    if (content?.length > 0) {
+        // console.log({ content })
+        const result = content.map((data, index) => {
+          
+                if (data !== 'false') {
+                    const sanitizedItem = convertOperatoresToXML(data);
+                    const generatedData = `<p>${sanitizedItem}</p>`;
+
+                    return generatedData;
+                }
+
+
+
+        });
+        return result.join('');
+    }
 }
 
 function generateSubSections(subSections) {
@@ -145,6 +178,8 @@ function generateSubSections(subSections) {
 }
 
 function generateChapter(ChapValue:any){
+    // const generatedSections = generateSection(ChapValue);
+
     if (configrationCheck(ChapValue.key) === "CHAPTER" || configrationCheck(ChapValue.key) === "APPENDIX" || configrationCheck(ChapValue.key) === "PART" ) {
         const chapterNumber = configrationCheck(ChapValue.key) === "PART" ? ChapValue.key.split(" ")[1].split("")[0]:ChapValue.key.split(" ")[1];
         const makePartNumber = configrationCheck(ChapValue.key) === "PART" ? ChapValue.key.split(" ")[0] +' '+ chapterNumber : ChapValue.key.split(" ")[1] 
@@ -153,9 +188,9 @@ function generateChapter(ChapValue:any){
         // console.log({ chapterNumber });
         // console.log({ chapterHeading });
         // console.log("@@@@@@@@@@@@@@@@@");
-
-        
-        const generatedContent = generateContent(ChapValue.value);
+        const chapterName = ChapValue.value[0];
+      
+        const generatedContent = ChapValue.value.length > 1 ? generateChapContent(ChapValue.value):'';
 
         const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
         if (configrationCheck(ChapValue.key) === "PART" ){
@@ -164,7 +199,7 @@ function generateChapter(ChapValue:any){
                 <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
                 <span class="label" epub:type="label">${chapterHeading}</span>
                     <br />
-                    
+                    <span class="chapter_title" epub:type="title"> ${chapterName}</span>
                 </h1>
             </header>
             ${removetheComma}`
@@ -175,7 +210,7 @@ function generateChapter(ChapValue:any){
                     <span class="label" epub:type="label">${chapterHeading}</span>
                     <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
                     <br />
-                    
+                    <span class="chapter_title" epub:type="title"> ${chapterName}</span>
                 </h1>
             </header>
             ${removetheComma}
@@ -216,19 +251,15 @@ function generateSection(ChapValue:any){
         const generatedContent = generateContent(ChapValue.value);
 
         const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
-        return `
-            <section id="VAEBC2021P1_Ch01_Sec101" class="level1">
+        return `<section id="VAEBC2021P1_Ch01_Sec101" class="level1">
                 <h1 class="level1">
                     <span class="label" epub:type="label">${heading}</span>
                     <span class="section_number" epub:type="ordinal">${sectionNumber}</span>
                     <br />
                     <span class="level1_title" epub:type="title">${sectionName}</span>
                 </h1>
-                
                 ${removetheComma}
-               
-            </section>`
-
+                </section>`
     }
 }
 
@@ -257,4 +288,36 @@ function generateSection(ChapValue:any){
 //             </section>`
 
 //     }
+// }
+
+// function contentGenerator(ChapValue:any) {
+//     const chaptersXml = generateChapter(ChapValue)
+    
+//     switch (ChapValue) {
+//         case value:
+            
+//             break;
+    
+//         default:
+//             break;
+//     }
+//     return `<section id="VAEBC2021P1_Ch01" class="chapter" epub:type="chapter">
+// 				<header>
+// 					<h1 class="chapter" epub:type="title">
+// 						<span class="label" epub:type="label">CHAPTER</span>
+// 						<span class="chapter_number" epub:type="ordinal">${currentChapter.chapter}</span>
+// 						<br />
+// 						<span class="chapter_title" epub:type="title"> ${currentChapter.chapterHeading}</span>
+// 					</h1>
+// 				</header>
+//                 ${generatedUserNotes}   
+//                 ${generatedPartsData}         
+// 				<section id="VAEBC2021P1_Ch01_Sec101" class="level1">
+// 					${generatedSections}
+// 					<section id="VAEBC2021P1_Ch01_Sec101.1" class="level2">
+// 					${generatedSubSections}
+// 					</section>
+// 				</section>
+// 			</section>`;
+    
 // }
