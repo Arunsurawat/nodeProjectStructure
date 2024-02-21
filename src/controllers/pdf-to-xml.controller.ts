@@ -12,7 +12,7 @@ import { findTOC, removeTOC } from '@utils/findTableOfContent'
 import { generateChapterSection } from "@/utils/chapaterSection";
 import { generateAllDataArray } from "@/utils/generateAllDataArray";
 import { generateTocContent } from "@/helper/generateTocContent";
-import { configrationCheck, getAllPTagData } from "@/helper/common";
+import { configrationCheck, configrationSetBookName, getAllPTagData } from "@/helper/common";
 import { generateChapterData } from "@/helper/generateChapterData";
 declare module 'express' {
     interface Request {
@@ -147,6 +147,9 @@ class PdfToXmlController {
                     }
                 
                     const newData = tocData?.TOC?.P.join()
+                   
+                    const bookName = configrationSetBookName(withoutTOCAllPTagData); 
+
                     const regexPattern = /\s*\.\s*\.\s*(?=[a-zA-Z\d]+)/g;
                     let outputArray = newData && newData.split(regexPattern).map((segment, index) => {
                         if (index == 0)
@@ -162,8 +165,12 @@ class PdfToXmlController {
                     outputArray = outputArray.length > 0 && outputArray.map(function (element) {
                         // Remove periods and commas from the result
                         element = element.replace("TABLE OF CONTENTS ", "").trim();
-                        // Replace dots not followed by a number with an empty string
-                        return element.replace(/\.(?!\d)|[,]/g, '').trim();
+                        element = element.replace(/\.(?!\d)|[,]/g, '').trim();
+                        // remove Book name in list
+                        element = element.replace((bookName).toUpperCase(), "")
+                        return element
+
+                        
                     });
 
 
@@ -185,20 +192,58 @@ class PdfToXmlController {
                     const getTOCList = Object.entries(finalTocObj);
 
 
+                    // function convertToList(list) {
+                    //     const newArray = [];
+                    //     let currentObject = {};
+                    //     list.forEach((item) => {
+                    //         const getKey = item[0]; // Get the key of the current item
+                    //         // const keyWithoutNumber = getKey.replace(/[0-9]/g, ''); // Remove any numbers from the key
+
+                    //         if (getKey.startsWith("CHAPTER")) {
+                    //             // If the key starts with "CHAPTER", it's a new object
+                    //             if (Object.keys(currentObject).length !== 0) {
+                    //                 newArray.push(currentObject); // Push the previous object to the array
+                    //             }
+                    //             currentObject = {}; // Reset currentObject for the new object
+                    //         }
+
+                    //         currentObject[getKey] = item[1]; // Add the key-value pair to the currentObject
+                    //     });
+
+                    //     // Push the last currentObject into newArray
+                    //     if (Object.keys(currentObject).length !== 0) {
+                    //         newArray.push(currentObject);
+                    //     }
+
+                    //     return newArray;
+                    // };
+
+                    
                     function convertToList(list) {
                         const newArray = [];
                         let currentObject = {};
+                        let currentStr = 'CHAPTER'
                         list.forEach((item) => {
                             const getKey = item[0]; // Get the key of the current item
                             // const keyWithoutNumber = getKey.replace(/[0-9]/g, ''); // Remove any numbers from the key
 
-                            if (getKey.startsWith("CHAPTER")) {
-                                // If the key starts with "CHAPTER", it's a new object
+                            if (getKey.startsWith("CHAPTER") && currentStr == 'CHAPTER') {
+                                currentStr = 'CHAPTER'
                                 if (Object.keys(currentObject).length !== 0) {
-                                    newArray.push(currentObject); // Push the previous object to the array
+                                    newArray.push(currentObject);
                                 }
-                                currentObject = {}; // Reset currentObject for the new object
+                                currentObject = {};
+                            } else if (getKey.startsWith("APPENDIX")) {
+                                currentStr = 'APPENDIX'
+
+                                if (Object.keys(currentObject).length !== 0) {
+                                    newArray.push(currentObject);
+                                }
+                                currentObject = {};
+
                             }
+                            console.log(currentObject)
+                            console.log(currentStr)
 
                             currentObject[getKey] = item[1]; // Add the key-value pair to the currentObject
                         });
@@ -210,7 +255,6 @@ class PdfToXmlController {
 
                         return newArray;
                     };
-
 
                     const finalTocArray = convertToList(getTOCList);
                    
@@ -245,7 +289,7 @@ class PdfToXmlController {
                             xmlns:epub="http://www.idpf.org/2007/ops"
                             xmlns:m="http://www.w3.org/1998/Math/MathML">
                             <head>
-                                <title>{bookTitle}</title>
+                                <title>${bookName}</title>
                                 <link href="newICCStylesheet.css" rel="Stylesheet" type="text/css"/>
                             </head>
                             <body epub:type="bodymatter">
@@ -263,7 +307,7 @@ class PdfToXmlController {
                             </body>
                     </iccxml>`;
                     // console.log({ finalXML })
-                    res.status(200).send(finalXML);
+                    res.status(200).send(generatedChapterData);
                     
                     
                 })
