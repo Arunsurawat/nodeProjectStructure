@@ -1,6 +1,6 @@
-import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, configrationCheck, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid } from "./common";
+import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid } from "./common";
 
-export function generateChapterData(chapterArray: any, originalDataObject:any) {
+export function generateChapterData(data: any, originalDataObject:any) {
 
     
     const originalObject = removeNumbersFromKeys(originalDataObject);
@@ -11,6 +11,15 @@ export function generateChapterData(chapterArray: any, originalDataObject:any) {
     
     const firstKey = Object.keys(originalObject[0])[0];
     // console.log({ firstKey });
+    const bookName = configrationSetBookName(data).toUpperCase();
+    const chapterArray = data.length > 0 &&  data.map((chapterData) =>{        
+        if (chapterData && typeof chapterData === 'string') {
+            return chapterData.replace((bookName), "");
+        }
+       
+    });
+
+    
     const ChaptersArray = breakArrayIntoChapters(chapterArray, firstKey)
     // console.log({ ChaptersArray });
     
@@ -27,13 +36,30 @@ export function generateChapterData(chapterArray: any, originalDataObject:any) {
                             // console.log("toc[property] =====>",toc[property])
                             //  console.log("---element---",element)
                             //  console.log("data[index+1] ==",data[index+1])
-                            if (`${element} ${data[index + 1]}` == toc[property] || element === toc[property]) {
+                            // const headingKey = typeof toc[property] ==='string' && toc[property].split(" ")[0];
+                            // const headingNumber = typeof toc[property] === 'string' && toc[property].split(" ")[1];
+                            // const finalHeading = `${headingKey} ${headingNumber}`;
+                            // console.log("()()()(==================", toc[property])
+                            
+                            const title = `${element} ${data[index + 1]}`
+                            const updateTitle = element.split(' ').length > 2 ? element : title;
+                            const elementHeadingTitle = cleanString(updateTitle);
+
+                            const tocHeading = toc[property];
+                            const cleanedTocHeading = cleanString(tocHeading);
+                            if (elementHeadingTitle === cleanedTocHeading) {
                                 // console.log({ data })
                                 // return data;
-                                const chapterObject = breakArrayIntoKeyValuePairs(data)
-                                verifiedData.push(chapterObject);
+                                const chapterObject = breakArrayIntoKeyValuePairs(data);
+                                const verifiedArrayLastIndex =verifiedData?.length > 0 && verifiedData[verifiedData.length -1] 
+                                const getIndex = verifiedData.length == 0 ? -1 : verifiedArrayLastIndex.map(el => el.key).indexOf(chapterObject[0].key);
+                                if (getIndex == -1){
+                                    verifiedData.push(chapterObject);
+                                    
+                                }
                                 
                             }
+                            
 
                         }
 

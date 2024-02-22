@@ -114,7 +114,13 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
                 outputArray.push({ key: currentKey, value: currentValue.trim().split('\n') });
                 currentValue = '';
             }
-            currentKey = item;
+            if (item.startsWith('APPENDIX')){
+                currentKey = `APPENDIX ${item.split(" ")[1]}`
+            } else if (item.startsWith('CHAPTER')){
+                currentKey =  `CHAPTER ${item.split(" ")[1]}`
+            }else {
+                currentKey = item
+            }
         } else {
             currentValue += item + '\n';
         }
@@ -123,6 +129,7 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
     // Push the last key-value pair
     if (currentKey !== null) {
         outputArray.push({ key: currentKey, value: currentValue.trim().split('\n') });
+        currentValue = ''
     }
 
     return outputArray;
@@ -136,7 +143,7 @@ export function configrationCheck(text) {
     const configrationCheckAppendix = 'APPENDIX,Resource';
     // console.log({text});
     const textValue = typeof text === "string" && text?.split(" ")[0]?.trim();
-    if (textValue === "CHAPTER" || textValue === "SUBCHAPTER") {
+    if (textValue === "CHAPTER" || textValue === "SUBCHAPTER" || textValue.startsWith("CHAPTER")) {
         // console.log("in==", textValue)
         return "CHAPTER"
     };
@@ -175,6 +182,24 @@ export function convertOperatoresToXML(str){
         .replace(/'/g, '\&apos;')
 }
 
+export function configrationSetBookName(withoutTOCAllPTagData) {
+    const getBookName = withoutTOCAllPTagData && withoutTOCAllPTagData[0]
+    if (getBookName) {
+        return getBookName;
+    }
+}
+
+export function cleanString(inputString) {
+    // Remove extra spaces
+
+    const makeString = inputString.toString();
+    let cleanedString = makeString.replace(/\s+/g, '');
+
+    // Remove special characters except letters, numbers, and spaces
+    cleanedString = cleanedString.replace(/[^a-zA-Z0-9\s]/g, '');
+
+    return cleanedString.toUpperCase();
+}
 // export const originalDataObject = {
 //     "PART0": "Part I—Administrative",
 //     "CHAPTER1": "CHAPTER 1 SCOPE AND ADMINISTRATION   1-1 DIVISION I—CALIFORNIA ADMINISTRATION",
