@@ -1,4 +1,4 @@
-import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid } from "./common";
+import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid ,bookShortCode} from "./common";
 
 export function generateChapterData(data: any, originalDataObject:any) {
 
@@ -86,19 +86,18 @@ export function generateChapterData(data: any, originalDataObject:any) {
         // let generatedSectionXml = '';
         
 
-
+        let currentChapterNumber = ''
         const result = currentChapter.map((ChapValue) => {
             if (configrationCheck(ChapValue.key) === "CHAPTER"){
-                const getXML = generateXml(ChapValue);
+                let getXMLData = generateXml(ChapValue);
+                currentChapterNumber = getXMLData.number
                 if(index === 0){
-                    
-                    return `<section id="VAEBC2021P1_Ch01" class="chapter" epub: type = "chapter" > ${getXML} `;
+                    return `<section id="${bookShortCode}_Ch${currentChapterNumber}" class="chapter" epub: type = "chapter" > ${getXMLData.xml} `;
                 }else{
-                    return `</section> <section id="VAEBC2021P1_Ch01" class="chapter" epub: type = "chapter" > ${getXML}`;
+                    return `</section> <section id="${bookShortCode}_Ch${currentChapterNumber}" class="chapter" epub: type = "chapter" > ${getXMLData.xml}`;
                 }
             }else {
-                const generatedSectionXml = generateSection(ChapValue);
-                console.log({ generatedSectionXml });
+                const generatedSectionXml = generateSection(ChapValue, currentChapterNumber);
                 const removetheComma = Array.isArray(generatedSectionXml) ? generatedSectionXml.join() : generatedSectionXml;
                 return removetheComma;
             }
@@ -112,19 +111,17 @@ export function generateChapterData(data: any, originalDataObject:any) {
 }
 function generateXml(ChapValue){
     // console.log('__________________________________:',ChapValue)
-    const generatedChapterXml = generateChapter(ChapValue) ? generateChapter(ChapValue) : '';
+    const generatedChapterData = generateChapter(ChapValue) ? generateChapter(ChapValue) : {number : '', type : '', xml:''};
+    return generatedChapterData
     // const generatedSectionXml = generateSection(ChapValue) ? generateSection(ChapValue) : '';
 
     // const generatedAppendixXml = generateAppendix(ChapValue) ? generateAppendix(ChapValue) :'';
     // const removetheCommaForChap = generatedChapterXml.join() ;
     // const removetheCommaForSec = generatedSectionXml.join() ;
-    if (generatedChapterXml ) {
-        const generatedXml = `
-                        ${generatedChapterXml}
-                       
-                    `
-        return generatedXml;
-    }
+    // if (generatedChapterData?.xml ) {
+    //     const generatedXml = `${generatedChapterData.xml}`
+    //     return {generatedXml};
+    // }
 }
 
 function generateUserNotes(currentChapter) {
@@ -219,28 +216,39 @@ function generateChapter(ChapValue:any){
         const generatedContent = ChapValue.value.length > 1 ? generateChapContent(ChapValue.value):'';
 
         const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
+    
         if (configrationCheck(ChapValue.key) === "PART" ){
-            return `<header>
-                <h1 class="chapter" epub:type="title">
-                <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
-                <span class="label" epub:type="label">${chapterHeading}</span>
-                    <br />
-                    <span class="chapter_title" epub:type="title"> ${chapterName}</span>
-                </h1>
-            </header>
-            ${removetheComma}`
+            return {
+                number : makePartNumber,
+                type : configrationCheck(ChapValue.key),
+                xml : `<header>
+            <h1 class="chapter" epub:type="title">
+            <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
+            <span class="label" epub:type="label">${chapterHeading}</span>
+                <br />
+                <span class="chapter_title" epub:type="title"> ${chapterName}</span>
+            </h1>
+        </header>
+        ${removetheComma}`
+    }
         }else {
-            return `
-            <header>
-                <h1 class="chapter" epub:type="title">
-                    <span class="label" epub:type="label">${chapterHeading}</span>
-                    <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
-                    <br />
-                    <span class="chapter_title" epub:type="title"> ${chapterName}</span>
-                </h1>
-            </header>
-            ${removetheComma}
-            `
+            return{
+                number : makePartNumber,
+                type : configrationCheck(ChapValue.key),
+                xml :  `
+                <header>
+                    <h1 class="chapter" epub:type="title">
+                        <span class="label" epub:type="label">${chapterHeading}</span>
+                        <span class="chapter_number" epub:type="ordinal">${makePartNumber}</span>
+                        <br />
+                        <span class="chapter_title" epub:type="title"> ${chapterName}</span>
+                    </h1>
+                </header>
+                ${removetheComma}
+                `
+    }
+            
+           
         }
     }
 }
@@ -266,7 +274,7 @@ function generateChapter(ChapValue:any){
 //     }
 // }
 
-function generateSection(ChapValue:any){
+function generateSection(ChapValue:any, chapterNumber:any){
     
     if (configrationCheck(ChapValue.key) === "SECTION") {
         const text = ChapValue.key.trim();
@@ -277,7 +285,7 @@ function generateSection(ChapValue:any){
         const generatedContent = generateContent(ChapValue.value);
 
         const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
-        return `<section id="VAEBC2021P1_Ch01_Sec101" class="level1">
+        return `<section id="${bookShortCode}_Ch${chapterNumber}_Sec${sectionNumber}" class="level1">
                 <h1 class="level1">
                     <span class="label" epub:type="label">${heading}</span>
                     <span class="section_number" epub:type="ordinal">${sectionNumber}</span>

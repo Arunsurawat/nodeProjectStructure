@@ -1,3 +1,5 @@
+export const bookShortCode = 'VAEBC2021P1'
+
 export function getAllPTagData(withoutTOC:any){
     let getAllPTag = [];
 

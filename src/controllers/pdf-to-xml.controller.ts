@@ -12,7 +12,7 @@ import { findTOC, removeTOC } from '@utils/findTableOfContent'
 import { generateChapterSection } from "@/utils/chapaterSection";
 import { generateAllDataArray } from "@/utils/generateAllDataArray";
 import { generateTocContent } from "@/helper/generateTocContent";
-import { configrationCheck, configrationSetBookName, getAllPTagData } from "@/helper/common";
+import { configrationCheck, configrationSetBookName, getAllPTagData,bookShortCode } from "@/helper/common";
 import { generateChapterData } from "@/helper/generateChapterData";
 declare module 'express' {
     interface Request {
@@ -302,9 +302,9 @@ class PdfToXmlController {
                                 <link href="newICCStylesheet.css" rel="Stylesheet" type="text/css"/>
                             </head>
                             <body epub:type="bodymatter">
-                                <section id="VAEBC2021P1" class="volume" epub:type="volume">
-                                    <section id="VAEBC2021P1_frontmatter" class="frontmatter" epub:type="frontmatter">
-                                        <section id="VAEBC2021P1_TOC">
+                                <section id="${bookShortCode}" id="VAEBC2021P1" class="volume" epub:type="volume">
+                                    <section id="${bookShortCode}_frontmatter" id="VAEBC2021P1_frontmatter" class="frontmatter" epub:type="frontmatter">
+                                        <section id="${bookShortCode}_TOC" >
                                             <nav class="table_of_contents" epub:type="toc">
                                                 <h1 class="frontmatter_title" epub:type="title">TABLE OF CONTENTS</h1>
                                                 ${generatedTOC}
