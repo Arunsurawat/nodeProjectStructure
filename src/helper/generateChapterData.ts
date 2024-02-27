@@ -1,4 +1,4 @@
-import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid ,bookShortCode} from "./common";
+import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid ,bookShortCode, areSimilar} from "./common";
 
 export function generateChapterData(data: any, originalDataObject:any) {
 
@@ -9,7 +9,7 @@ export function generateChapterData(data: any, originalDataObject:any) {
     // console.log("chapterArray===", chapterArray)
 
     
-    const firstKey = Object.keys(originalObject[0])[0];
+    // const firstKey = Object.keys(originalObject[0])[0];
     // console.log({ firstKey });
     const bookName = configrationSetBookName(data).toUpperCase();
     const chapterArray = data.length > 0 &&  data.map((chapterData) =>{        
@@ -20,9 +20,10 @@ export function generateChapterData(data: any, originalDataObject:any) {
     });
 
     
-    const ChaptersArray = breakArrayIntoChapters(chapterArray, firstKey)
+    const ChaptersArray = breakArrayIntoChapters(chapterArray);
+    // return { chapterArray, firstKey };
     // console.log({ ChaptersArray });
-    
+    // return ChaptersArray
     const verifiedData = [];
     ChaptersArray.length > 0 && ChaptersArray.forEach(data => {
          data.forEach((element, index) => {
@@ -42,12 +43,12 @@ export function generateChapterData(data: any, originalDataObject:any) {
                             // console.log("()()()(==================", toc[property])
                             
                             const title = `${element} ${data[index + 1]}`
-                            const updateTitle = element.split(' ').length > 2 ? element : title;
+                            const updateTitle = element.length > 12 ? element : title;
                             const elementHeadingTitle = cleanString(updateTitle);
 
                             const tocHeading = toc[property];
                             const cleanedTocHeading = cleanString(tocHeading);
-                            if (elementHeadingTitle === cleanedTocHeading) {
+                            if (areSimilar(elementHeadingTitle, cleanedTocHeading, 12)) {
                                 // console.log({ data })
                                 // return data;
                                 const chapterObject = breakArrayIntoKeyValuePairs(data);
@@ -92,15 +93,34 @@ export function generateChapterData(data: any, originalDataObject:any) {
                 let getXMLData = generateXml(ChapValue);
                 currentChapterNumber = getXMLData.number
                 if(index === 0){
-                    return `<section id="${bookShortCode}_Ch${currentChapterNumber}" class="chapter" epub: type = "chapter" > ${getXMLData.xml} `;
+                    return `<section id="${bookShortCode}_Ch${currentChapterNumber}" class="chapter" epub:type = "chapter" > ${getXMLData.xml} `;
                 }else{
-                    return `</section> <section id="${bookShortCode}_Ch${currentChapterNumber}" class="chapter" epub: type = "chapter" > ${getXMLData.xml}`;
+                    return `</section> <section id="${bookShortCode}_Ch${currentChapterNumber}" class="chapter" epub:type = "chapter" > ${getXMLData.xml}`;
                 }
-            }else {
+            }else if (configrationCheck(ChapValue.key) === "APPENDIX") {
+                const generatedAppendixXml: any = generateAppendix(ChapValue);
+
+                const validAppendixXml = (generatedAppendixXml !== undefined) ? generatedAppendixXml : '';
+
+
+                const removetheCommaFromAppendixXml = Array.isArray(validAppendixXml) ? validAppendixXml.join() : validAppendixXml;
+                const finalAppendix = removetheCommaFromAppendixXml ? removetheCommaFromAppendixXml : "";
+                // return `</section>${finalAppendix}`;
+                if (index === 0) {
+                return `</section>  <section id="Bookshortcode_AppxA" class="appendix" epub:type="appendix"> ${finalAppendix} </section>`;
+                } else {
+                    return `</section>  <section id="Bookshortcode_AppxA" class="appendix" epub:type="appendix"> ${finalAppendix}`;
+                }
+               
+
+            } else {
                 const generatedSectionXml = generateSection(ChapValue, currentChapterNumber);
                 const removetheComma = Array.isArray(generatedSectionXml) ? generatedSectionXml.join() : generatedSectionXml;
-                return removetheComma;
+                
+                const validRemovetheComma = removetheComma ? removetheComma : '';
+                return validRemovetheComma;
             }
+            
         })
         return result.join('');
     })
@@ -203,7 +223,7 @@ function generateSubSections(subSections) {
 function generateChapter(ChapValue:any){
     // const generatedSections = generateSection(ChapValue);
 
-    if (configrationCheck(ChapValue.key) === "CHAPTER" || configrationCheck(ChapValue.key) === "APPENDIX" || configrationCheck(ChapValue.key) === "PART" ) {
+    if (configrationCheck(ChapValue.key) === "CHAPTER" || configrationCheck(ChapValue.key) === "PART" ) {
         const chapterNumber = configrationCheck(ChapValue.key) === "PART" ? ChapValue.key.split(" ")[1].split("")[0]:ChapValue.key.split(" ")[1];
         const makePartNumber = configrationCheck(ChapValue.key) === "PART" ? ChapValue.key.split(" ")[0] +' '+ chapterNumber : ChapValue.key.split(" ")[1] 
         const chapterHeading = configrationCheck(ChapValue.key) === "PART" ? ChapValue.key.split(chapterNumber)[1]: ChapValue.key.split(" ")[0];
@@ -297,32 +317,28 @@ function generateSection(ChapValue:any, chapterNumber:any){
     }
 }
 
-// function generateAppendix(ChapValue: any) {
+function generateAppendix(ChapValue: any) {
+    if (configrationCheck(ChapValue.key) === "APPENDIX") {
+        const text = ChapValue.key.trim();
+        const heading = text.split(" ")[0];
+        const sectionNumber = heading ? text.split(" ")[1] : text.split(" ")[0];
+        const appendixName = ChapValue?.value[0];
 
-//     if (configrationCheck(ChapValue.key) === "APPENDIX") {
-//         const text = ChapValue.key.trim();
-//         const heading = text.split(" ")[0];
-//         const sectionNumber = heading ? text.split(" ")[1] : text.split(" ")[0];
-//         const sectionName = text.split(sectionNumber)[1];
+        const generatedContent = generateContent(ChapValue.value);
 
-//         const generatedContent = generateContent(ChapValue.value);
+        const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
+        return `
+                <header>
+                <h1 class="appendix" epub:type="title"><span class="label" epub:type="label">APPENDIX</span><span class="appendix_number" epub:type="ordinal">${sectionNumber}</span><br/><span class="appendix_title" epub:type="title">${appendixName}</span></h1>
+                <div class="help">
+                <span class="bold">The provisions contained in this appendix are not mandatory unless specifically referenced in the adopting ordinance.</span>
+                </div>
+                </header>
+               ${removetheComma}
+            `
 
-//         const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
-//         return `
-//             <section id="VAEBC2021P1_Ch01_Sec101" class="level1">
-//                 <h1 class="level1">
-//                     <span class="label" epub:type="label">${heading}</span>
-//                     <span class="section_number" epub:type="ordinal">${sectionNumber}</span>
-//                     <br />
-//                     <span class="level1_title" epub:type="title">${sectionName}</span>
-//                 </h1>
-                
-//                 ${removetheComma}
-               
-//             </section>`
-
-//     }
-// }
+    }
+}
 
 // function contentGenerator(ChapValue:any) {
 //     const chaptersXml = generateChapter(ChapValue)

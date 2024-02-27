@@ -77,21 +77,53 @@ export function removeNumbersFromKeys(inputArray) {
 }
 
 
-export function breakArrayIntoChapters(dataArray, key) {
+// export function breakArrayIntoChapters(dataArray, key) {
+//     const chapterArray = [];
+//     let chapterData = [];
+
+//     for (let i = 0; i < dataArray.length; i++) {
+//         const line = typeof dataArray[i] === 'string' && dataArray[i].trim();
+//         if (line && line.split(" ")[0] == key) {
+//             if (chapterData.length > 0) {
+//                 chapterArray.push(chapterData);
+//                 chapterData = []; // Reset chapterData for the next chapter
+//             }
+//         }
+
+//         chapterData.push(line);
+//     }
+
+//     // Push the last chapter data
+//     if (chapterData.length > 0) {
+//         chapterArray.push(chapterData);
+//     }
+
+//     return chapterArray;
+// }
+export function breakArrayIntoChapters(dataArray) {
+    const keys = ["CHAPTER", "APPENDIX"];
+
+    if (!Array.isArray(keys)) {
+        throw new Error('Keys must be an array.');
+    }
+
     const chapterArray = [];
     let chapterData = [];
 
-    for (let i = 0; i < dataArray.length; i++) {
-        const line = typeof dataArray[i] === 'string' && dataArray[i].trim();
-        if (line && line.split(" ")[0] == key) {
+    dataArray.reduce((prevKey, line) => {
+        const currentKey = typeof line === 'string' ? line.trim().split(" ")[0] : null;
+
+        if (keys.includes(currentKey)) {
             if (chapterData.length > 0) {
                 chapterArray.push(chapterData);
-                chapterData = []; // Reset chapterData for the next chapter
+                chapterData = [];
             }
         }
 
         chapterData.push(line);
-    }
+
+        return currentKey;
+    }, null);
 
     // Push the last chapter data
     if (chapterData.length > 0) {
@@ -100,6 +132,7 @@ export function breakArrayIntoChapters(dataArray, key) {
 
     return chapterArray;
 }
+
 
 export function breakArrayIntoKeyValuePairs(inputArray) {
     const validKeys = new Set(['CHAPTER', 'SUBCHAPTER', 'SECTION', 'PART', 'APPENDIX']);
@@ -113,6 +146,9 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
 
         if (validKeys.has(potentialKey)) {
             if (currentKey !== null) {
+                // if (validKeys.has(currentKey.split(" ")[0]) && currentValue == '') {
+                //     currentValue = item.split(currentKey)[1];
+                // }
                 outputArray.push({ key: currentKey, value: currentValue.trim().split('\n') });
                 currentValue = '';
             }
@@ -120,6 +156,9 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
                 currentKey = `APPENDIX ${item.split(" ")[1]}`
             } else if (item.startsWith('CHAPTER')){
                 currentKey =  `CHAPTER ${item.split(" ")[1]}`
+                if(item.length > 12) {
+                    currentValue = item.split(currentKey)[1]
+                }
             }else {
                 currentKey = item
             }
@@ -130,6 +169,9 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
 
     // Push the last key-value pair
     if (currentKey !== null) {
+        if (validKeys.has(currentKey.split(" ")[0]) && currentValue ==''){
+            currentValue = inputArray[0].split(currentKey)[1];
+        }
         outputArray.push({ key: currentKey, value: currentValue.trim().split('\n') });
         currentValue = ''
     }
@@ -138,24 +180,47 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
 }
 
 
+// export function configrationCheck(text) {
+//     const configrationCheckChapter = 'CHAPTER,SUBCHAPTER';
+//     const configrationCheckSection = 'Section,Division';
+//     const configrationCheckPart = 'PART, Part';
+//     const configrationCheckAppendix = 'APPENDIX,Resource';
+//     // console.log({text});
+//     const textValue = typeof text === "string" && text?.split(" ")[0]?.trim();
+//     if (textValue === "CHAPTER" || textValue === "SUBCHAPTER" || textValue.startsWith("CHAPTER")) {
+//         // console.log("in==", textValue)
+//         return "CHAPTER"
+//     };
+//     if (textValue === "Section" || textValue === "SECTION") {
+//         return "SECTION";
+//     }
+//     if (textValue === "PART" || textValue === "Part" || textValue === "DIVISION") {
+//         return "PART";
+//     }
+//     if (textValue === "APPENDIX" || textValue === "Resource") {
+//         return "APPENDIX";
+//     }
+
+// }
+
 export function configrationCheck(text) {
     const configrationCheckChapter = 'CHAPTER,SUBCHAPTER';
-    const configrationCheckSection = 'Section,Division';
-    const configrationCheckPart = 'PART, Part';
+    const configrationCheckSection = 'Section,Division,SECTION';
+    const configrationCheckPart = 'PART,Part,DIVISION';
     const configrationCheckAppendix = 'APPENDIX,Resource';
     // console.log({text});
     const textValue = typeof text === "string" && text?.split(" ")[0]?.trim();
-    if (textValue === "CHAPTER" || textValue === "SUBCHAPTER" || textValue.startsWith("CHAPTER")) {
+    if (configrationCheckChapter.includes(textValue)) {
         // console.log("in==", textValue)
         return "CHAPTER"
     };
-    if (textValue === "Section" || textValue === "SECTION") {
+    if (configrationCheckSection.includes(textValue)) {
         return "SECTION";
     }
-    if (textValue === "PART" || textValue === "Part" || textValue === "DIVISION") {
+    if (configrationCheckPart.includes(textValue)) {
         return "PART";
     }
-    if (textValue === "APPENDIX" || textValue === "Resource") {
+    if (configrationCheckAppendix.includes(textValue)) {
         return "APPENDIX";
     }
 
@@ -201,6 +266,21 @@ export function cleanString(inputString) {
     cleanedString = cleanedString.replace(/[^a-zA-Z0-9\s]/g, '');
 
     return cleanedString.toUpperCase();
+}
+
+export function areSimilar(s1, s2, threshold) {
+    const minLength = Math.min(s1.length, s2.length);
+    let matchCount = 0;
+
+    // Count the number of matching characters
+    for (let i = 0; i < minLength; i++) {
+        if (s1[i] === s2[i]) {
+            matchCount++;
+        }
+    }
+
+    // Return true if the number of matching characters exceeds the threshold
+    return matchCount >= threshold;
 }
 // export const originalDataObject = {
 //     "PART0": "Part I—Administrative",
