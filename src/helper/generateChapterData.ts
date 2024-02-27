@@ -191,22 +191,122 @@ function generateChapContent(content) {
 
 function generateContent(content) {
     if (content?.length > 0) {
+        const getContentData = createList(content)
         // console.log({ content })
-        const result = content.map((data, index) => {
+        // const result = content.map((data, index) => {
           
-                if (data !== 'false') {
-                    const sanitizedItem = convertOperatoresToXML(data);
-                    const generatedData = `<p>${sanitizedItem}</p>`;
+        //         if (data !== 'false') {
+        //             const sanitizedItem = convertOperatoresToXML(data);
+        //             const generatedData = `<p>${sanitizedItem}</p>`;
 
-                    return generatedData;
-                }
+        //             return generatedData;
+        //         }
 
 
 
-        });
-        return result.join('');
+        // });
+        // return getContentData.join('');
     }
 }
+function createList(list) {
+    if(list){
+        list = list.filter(item =>  item != '');
+        let inList = false; // Flag to track whether we're currently inside a list
+        let listHTML = ''; // Variable to store the generated list HTML
+        let patternMatchSublist = /\b\d+(\.\d+|\.\d+\.[a-zA-Z]|\.[a-zA-Z])\b/g;
+        let currentSubList = ''
+    
+        list.forEach((item, index,array) => {
+            if (item && item !== 'false') {
+                let sanitizedItem = convertOperatoresToXML(item); // You may need to define this function
+                let matches = sanitizedItem.match(patternMatchSublist);
+                let subListFleg = matches && matches?.length > 0 ? '__PLACEHOLDER_SUB_LIST_CONTENT__' : ''
+                if(matches && matches.length>0 && sanitizedItem.includes('__PLACEHOLDER_LIST_CONTENT__')){
+                    sanitizedItem =   subListFleg + ' ' + sanitizedItem 
+                }
+                if (sanitizedItem.includes("__PLACEHOLDER_LIST_CONTENT__") ) {
+                    if(!array[index-2]?.includes("__PLACEHOLDER_LIST_CONTENT__") ){
+                        listHTML +=  `<div class="list"><ol class="no_mark"><li><p><span class="label">${sanitizedItem}</span>`
+                    }else{
+                        if(sanitizedItem.includes('__PLACEHOLDER_SUB_LIST_CONTENT__')){
+                                currentSubList += currentSubList ?  `<li><p><span class="label subList"> ${sanitizedItem}</span>` : 
+                                `
+                                  <ol class="no_mark subList"><li><p><span class="label subList">${sanitizedItem}</span>
+                                `
+                        }else{
+                            if(currentSubList){
+                                listHTML += currentSubList + '</ol></li>'
+                                currentSubList = ''
+                            }
+                            listHTML +=  `<li><p><span class="label"> ${sanitizedItem}</span>`
+                           
+                        }
+                    }
+                    // Start a new list
+                    inList = true;
+                } else if (inList) {
+                    // If inside a list, add list item
+                    if(!array[index]?.includes("__PLACEHOLDER_LIST_CONTENT__") && array[index+1] && !array[index+1]?.includes("__PLACEHOLDER_LIST_CONTENT__") ){
+                        listHTML +=  sanitizedItem + '</p></li></ol></div>'
+                        inList = false;
+    
+                    }else{
+                            if(currentSubList){
+                                currentSubList += sanitizedItem + '</p></li>'
+                            }else{
+                                listHTML +=  sanitizedItem + '</p>' 
+                            }
+                    }
+                } else {
+                    // If not inside a list, treat it as regular paragraph content
+                    listHTML += `<p>${sanitizedItem}</p>`;
+                }
+            }
+        });
+    
+        // Close the list if we were inside a list
+        if (inList) {
+            inList = false;
+        }
+        return listHTML;
+    }else{
+        return ''
+    }
+}
+function generateSubList(list){
+        // console.log(list)
+    // list.forEach((item, index,array) => {
+    // })
+
+}
+
+
+
+// function createList(list){
+//     let inListNextContent:any = ''
+//     let  currentListHTML = '<div class="list"><ol class="no_mark">';
+
+//      const result = list.map((item, index) => {
+//          if (item !== 'false') {
+//              const sanitizedItem = convertOperatoresToXML(item);
+//              if (item.includes("__PLACEHOLDER_LIST_CONTENT__")) {
+//                      // let removeFlagContent = item.replace("__PLACEHOLDER_LIST_CONTENT__", "");
+//                      inListNextContent = false
+//                      return '<div class="list"><ol class="no_mark"><li><p> <span class="label">' + item + '</span>'  + list[index + 1] + '</p></li>'
+//              }else if(inListNextContent){
+//                  if(inListNextContent == false && inListNextContent != ''){
+//                      return `</ol></div><p>${sanitizedItem}</p>`
+//                  }else{
+//                      return `<p>${sanitizedItem}</p>`
+//                  }
+//              }else{
+//                 inListNextContent = true
+//              }
+//          }
+//      });
+//   return result.join('');
+ 
+//  }
 
 function generateSubSections(subSections) {
     if (subSections?.length > 0) {
@@ -302,9 +402,12 @@ function generateSection(ChapValue:any, chapterNumber:any){
         const sectionNumber = heading ? text.split(" ")[1] : text.split(" ")[0];
         const sectionName = text.split(sectionNumber)[1];
         
-        const generatedContent = generateContent(ChapValue.value);
+        // const generatedContent = generateContent(ChapValue.value);
+        const generatedListContent = createList(ChapValue.value)
+        // const generatedSubList = generateSubList(generatedListContent)
 
-        const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
+
+        const removetheComma = Array.isArray(generatedListContent) ? generatedListContent.join() : generatedListContent
         return `<section id="${bookShortCode}_Ch${chapterNumber}_Sec${sectionNumber}" class="level1">
                 <h1 class="level1">
                     <span class="label" epub:type="label">${heading}</span>

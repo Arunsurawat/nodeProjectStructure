@@ -79,22 +79,26 @@ class PdfToXmlController {
                     console.error('Error reading file:', err);
                     return;
                 }
-                // Replace <H1>, <H2>, <H3>, <H4>, <H5>, and <H6> tags with <P> tags
-                // let modifiedData = data.replace(/<\s*(\/)?\s*(H[1-6])(\s+[^>]*)?>/g, (match, p1, p2) => {
-                //     if (p1 === '/') {
-                //         return '</P>'; // Closing tag
-                //     } else {
-                //         return '<P>'; // Opening tag
-                //     }
-                // });
-                // Replace <H1>, <H2>, <H3>, <H4>, <H5>, and <H6>, <P>, <L>, <LI>, <Lbl>, and <LBody> tags
-                let modifiedData = data.replace(/<\s*(\/)?\s*(H[1-6]|Lbl|LBody|Div)(\s+[^>]*)?>/g, (match, p1, p2) => {
-                    if (p1 === '/') {
-                        return '</P>'; // Closing tag
-                    } else {
-                        return '<P>'; // Opening tag
-                    }
+                let modifiedData = data.replace(/(<\/?[phPH]\d?>)((\d|[aA])\..*?)(<\/?[phPH]\d?>)/g, (match, p1, p2, p3) => {
+            //    let  modifiedData = data.replace(/(<\/?[pP]>)((\d|[aA])\..*?)(<\/?[pP]>)/g, (match, p1, p2, p3) => {
+                    const getFirstIndexValue = p2.split(' ')[0].trim(); // Extracts the number part
+                    const str = p2.replace(getFirstIndexValue, "").trim();
+                    // if(str.includes('Buildings housing exempt equipment and wiring')){
+                    //     debugger
+                    // }
+                    return `<Lbl>${getFirstIndexValue}</Lbl> <P>${str}</P>`;
                 });
+
+                // Replace <H1>, <H2>, <H3>, <H4>, <H5>, and <H6>, <P>, <L>, <LI>, <Lbl>, and <LBody> tags
+               modifiedData = modifiedData.replace(/<\s*(\/)?\s*(H[1-6]|Lbl|LBody|Div)(\s+[^>]*)?>/g, (match, p1, p2) => {
+        
+                if (p1 === '/') {
+                    return '</P>'; // Closing tag
+                } else {
+                    return  match == '<Lbl>' ? '<P> __PLACEHOLDER_LIST_CONTENT__ ' : '<P>'; // Opening tag
+                }
+            });
+
                 // Remove the <Part> and </Part> tags 
                 modifiedData = modifiedData.replace(/<Part>(.*?)<\/Part>/gs, '$1');
 
@@ -116,10 +120,10 @@ class PdfToXmlController {
                     }
                 });
 
-                
-           
             
-            
+                // res.status(200).send(modifiedData);
+                // return 
+
             // Parse XML to JavaScript object
                 xml2js.parseString(modifiedData, { explicitArray: false, preserveChildrenOrder: true, mergeAttrs: false }, (err, result) => {
                 if (err) {
