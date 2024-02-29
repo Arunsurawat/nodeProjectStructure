@@ -177,7 +177,7 @@ function generateChapContent(content) {
             if(index > 1){
                 if (data !== 'false') {
                     const sanitizedItem = convertOperatoresToXML(data);
-                    const generatedData = `<p>${sanitizedItem}</p>`;
+                    const generatedData = (sanitizedItem !== "undefined") ?`<p>${sanitizedItem}</p>`:'';
 
                     return generatedData;
                 }
@@ -191,23 +191,37 @@ function generateChapContent(content) {
 
 function generateContent(content) {
     if (content?.length > 0) {
-        const getContentData = createList(content)
-        // console.log({ content })
-        // const result = content.map((data, index) => {
-          
-        //         if (data !== 'false') {
-        //             const sanitizedItem = convertOperatoresToXML(data);
-        //             const generatedData = `<p>${sanitizedItem}</p>`;
-
-        //             return generatedData;
-        //         }
-
-
-
-        // });
-        // return getContentData.join('');
+        const result = content.map((data, index) => {
+            if (data !== 'false') {
+                const sanitizedItem = convertOperatoresToXML(data);
+                const generatedData = (sanitizedItem !== "undefined") ?`<p>${sanitizedItem}</p>`: '';
+                return generatedData;
+            }
+        })
+        
+        return result.join('');
     }
 }
+
+// function generateContent(content) {
+//     if (content?.length > 0) {
+//         const getContentData = createList(content)
+//         // console.log({ content })
+//         // const result = content.map((data, index) => {
+          
+//         //         if (data !== 'false') {
+//         //             const sanitizedItem = convertOperatoresToXML(data);
+//         //             const generatedData = `<p>${sanitizedItem}</p>`;
+
+//         //             return generatedData;
+//         //         }
+
+
+
+//         // });
+//         // return getContentData.join('');
+//     }
+// }
 function createList(list) {
     if(list){
         list = list.filter(item =>  item != '');
@@ -335,7 +349,8 @@ function generateChapter(ChapValue:any){
       
         const generatedContent = ChapValue.value.length > 1 ? generateChapContent(ChapValue.value):'';
 
-        const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
+        const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent;
+        const finalContent = removetheComma !== undefined ? removetheComma : '';
     
         if (configrationCheck(ChapValue.key) === "PART" ){
             return {
@@ -349,7 +364,7 @@ function generateChapter(ChapValue:any){
                 <span class="chapter_title" epub:type="title"> ${chapterName}</span>
             </h1>
         </header>
-        ${removetheComma}`
+        ${finalContent}`
     }
         }else {
             return{
@@ -364,7 +379,7 @@ function generateChapter(ChapValue:any){
                         <span class="chapter_title" epub:type="title"> ${chapterName}</span>
                     </h1>
                 </header>
-                ${removetheComma}
+                ${finalContent}
                 `
     }
             
@@ -402,12 +417,13 @@ function generateSection(ChapValue:any, chapterNumber:any){
         const sectionNumber = heading ? text.split(" ")[1] : text.split(" ")[0];
         const sectionName = text.split(sectionNumber)[1];
         
-        // const generatedContent = generateContent(ChapValue.value);
-        const generatedListContent = createList(ChapValue.value)
+        const generatedContent = generateContent(ChapValue.value);
+        // const generatedListContent = createList(ChapValue.value)
         // const generatedSubList = generateSubList(generatedListContent)
 
 
-        const removetheComma = Array.isArray(generatedListContent) ? generatedListContent.join() : generatedListContent
+        const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent;
+        const finalContent = removetheComma !== undefined ? removetheComma: '';
         return `<section id="${bookShortCode}_Ch${chapterNumber}_Sec${sectionNumber}" class="level1">
                 <h1 class="level1">
                     <span class="label" epub:type="label">${heading}</span>
@@ -415,7 +431,7 @@ function generateSection(ChapValue:any, chapterNumber:any){
                     <br />
                     <span class="level1_title" epub:type="title">${sectionName}</span>
                 </h1>
-                ${removetheComma}
+                ${finalContent}
                 </section>`
     }
 }
@@ -429,7 +445,8 @@ function generateAppendix(ChapValue: any) {
 
         const generatedContent = generateContent(ChapValue.value);
 
-        const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent
+        const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent;
+        const finalContent = removetheComma !== undefined ? removetheComma : '';
         return `
                 <header>
                 <h1 class="appendix" epub:type="title"><span class="label" epub:type="label">APPENDIX</span><span class="appendix_number" epub:type="ordinal">${sectionNumber}</span><br/><span class="appendix_title" epub:type="title">${appendixName}</span></h1>
@@ -437,7 +454,7 @@ function generateAppendix(ChapValue: any) {
                 <span class="bold">The provisions contained in this appendix are not mandatory unless specifically referenced in the adopting ordinance.</span>
                 </div>
                 </header>
-               ${removetheComma}
+               ${finalContent}
             `
 
     }

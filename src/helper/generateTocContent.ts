@@ -50,18 +50,18 @@ export function generateTocContent(data:any) {
         const sectionView = generateSection(chapter);
         
         
-        
+        const finalSectionView = sectionView ? ` <div class="toc nomark">
+                    <div class="toc_level_2">
+                       ${sectionView} 
+                    </div>
+                </div>`:'';
         return `<div class="toc nomark">
             <div class="toc_level_1">
                 ${generatedCHapterXml}
                 <p>
                     <span class="content_left">Section</span>
                 </p>
-                <div class="toc nomark">
-                    <div class="toc_level_2">
-                       ${sectionView} 
-                    </div>
-                </div>
+               ${finalSectionView}
             </div>
         </div>`
         
@@ -83,6 +83,21 @@ function generateChapter(chapter: any) {
         // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", ChapValue)
 
         if (configrationCheck(ChapValue) === "CHAPTER") {
+            const text = chapter[ChapValue]?.trim();
+            const heading = text.split(" ")[0];
+            const chapterNumber = text.split(" ")[1];
+            const chapterName = text.substring(heading.length + 1 + chapterNumber?.length + 1);
+            result = `<p>
+                                <span class="label">${heading} </span>
+                                <span class="ordinal">${chapterNumber}</span>
+                                <span class="text"> ${chapterName} </span>
+                                <span class="locator">
+                                    <a class="toc_pages" href="#VAEBC2021P1_Ch01">1-1</a>
+                                </span>
+                            </p>`
+        }
+        
+        if (configrationCheck(ChapValue) === "APPENDIX") {
             const text = chapter[ChapValue]?.trim();
             const heading = text.split(" ")[0];
             const chapterNumber = text.split(" ")[1];
