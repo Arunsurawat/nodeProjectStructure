@@ -190,17 +190,22 @@ function generateChapContent(content) {
 }
 
 function generateContent(content) {
-    if (content?.length > 0) {
-        const result = content.map((data, index) => {
-            if (data !== 'false') {
-                const sanitizedItem = convertOperatoresToXML(data);
-                const generatedData = (sanitizedItem !== "undefined") ?`<p>${sanitizedItem}</p>`: '';
-                return generatedData;
-            }
-        })
+    // if (content?.length > 0) {
+    //     const result = content.map((data, index) => {
+    //         if (data !== 'false') {
+    //             const sanitizedItem = convertOperatoresToXML(data);
+    //             const generatedData = (sanitizedItem !== "undefined") ?`<p>${sanitizedItem}</p>`: '';
+    //             return generatedData;
+    //         }
+    //     })
         
-        return result.join('');
-    }
+    //     return result.join('');
+    // }
+
+    let generatedData = createList(content)
+    generatedData = generatedData.replace(/__PLACEHOLDER_LIST_CONTENT__|__PLACEHOLDER_SUB_LIST_CONTENT__/g, '');
+    return generatedData
+
 }
 
 // function generateContent(content) {
@@ -224,25 +229,48 @@ function generateContent(content) {
 // }
 function createList(list) {
     if(list){
-        list = list.filter(item =>  item != '');
+        list = list.filter(item =>  item != '' );
         let inList = false; // Flag to track whether we're currently inside a list
         let listHTML = ''; // Variable to store the generated list HTML
-        let patternMatchSublist = /\b\d+(\.\d+|\.\d+\.[a-zA-Z]|\.[a-zA-Z])\b/g;
+
+        let patternMatchSublist = /^(\b(?![0-9]{3}\.)\d+(\.\d+|\.\d+\.[a-zA-Z]|\.[a-zA-Z])\b)/g;
         let currentSubList = ''
-    
+        const regex  =/^(\d+(\.\d+)?\.)/;
+
+         list =  list.flatMap(item => {
+             // Use regex to find matches in the item
+             const match =  item.replace('__PLACEHOLDER_LIST_CONTENT__ ', '').trim().match(regex);
+             const patternMatch = item.replace('__PLACEHOLDER_LIST_CONTENT__ ', '').trim().match(patternMatchSublist)
+             if (match && patternMatch?.length>0) {
+                 // If a match is found, return an array with the full number and the rest of the string
+                 return [match[0], item.substring(match[0].length)];
+             } else {
+                 // If no match is found, return the original item
+                 return item;
+             }
+         });
+        list = list.map(item =>  {
+            let matches = item.replace('__PLACEHOLDER_LIST_CONTENT__ ', '').trim().match(patternMatchSublist);
+            if(matches && matches.length>0 ){
+                return item =  '__PLACEHOLDER_SUB_LIST_CONTENT__ __PLACEHOLDER_LIST_CONTENT__' + ' ' + item 
+            }else{
+                return item
+            }
+        } );
+
+
         list.forEach((item, index,array) => {
-            if (item && item !== 'false') {
+            if (item && item !== 'false' && item != undefined) {
+                
                 let sanitizedItem = convertOperatoresToXML(item); // You may need to define this function
-                let matches = sanitizedItem.match(patternMatchSublist);
-                let subListFleg = matches && matches?.length > 0 ? '__PLACEHOLDER_SUB_LIST_CONTENT__' : ''
-                if(matches && matches.length>0 && sanitizedItem.includes('__PLACEHOLDER_LIST_CONTENT__')){
-                    sanitizedItem =   subListFleg + ' ' + sanitizedItem 
+                if(sanitizedItem.includes('British thermal unit per hour ')){
+                    console.log(sanitizedItem)
                 }
-                if (sanitizedItem.includes("__PLACEHOLDER_LIST_CONTENT__") ) {
+                if (  sanitizedItem.includes("__PLACEHOLDER_LIST_CONTENT__") ) {
                     if(!array[index-2]?.includes("__PLACEHOLDER_LIST_CONTENT__") ){
                         listHTML +=  `<div class="list"><ol class="no_mark"><li><p><span class="label">${sanitizedItem}</span>`
                     }else{
-                        if(sanitizedItem.includes('__PLACEHOLDER_SUB_LIST_CONTENT__')){
+                        if(sanitizedItem.startsWith('__PLACEHOLDER_SUB_LIST_CONTENT__')){
                                 currentSubList += currentSubList ?  `<li><p><span class="label subList"> ${sanitizedItem}</span>` : 
                                 `
                                   <ol class="no_mark subList"><li><p><span class="label subList">${sanitizedItem}</span>
@@ -253,44 +281,55 @@ function createList(list) {
                                 currentSubList = ''
                             }
                             listHTML +=  `<li><p><span class="label"> ${sanitizedItem}</span>`
-                           
                         }
                     }
                     // Start a new list
                     inList = true;
                 } else if (inList) {
                     // If inside a list, add list item
-                    if(!array[index]?.includes("__PLACEHOLDER_LIST_CONTENT__") && array[index+1] && !array[index+1]?.includes("__PLACEHOLDER_LIST_CONTENT__") ){
-                        listHTML +=  sanitizedItem + '</p></li></ol></div>'
+                    if(!array[index]?.includes("__PLACEHOLDER_LIST_CONTENT__") && array[index+1] && !array[index+1].includes("__PLACEHOLDER_LIST_CONTENT__") ){
+                        if(currentSubList){
+                            currentSubList +=  sanitizedItem + '</p></li></ol>'
+                        }else{
+                            listHTML +=  sanitizedItem + '</p></li></ol></div>'
+                        }
                         inList = false;
-    
                     }else{
                             if(currentSubList){
                                 currentSubList += sanitizedItem + '</p></li>'
+                            }else if(index == array.length-1 ){
+                                listHTML +=  sanitizedItem + '</p></li> </ol></div>' 
+                            }else if(array[index+1]?.includes("__PLACEHOLDER_SUB_LIST_CONTENT__")){
+                                listHTML +=  sanitizedItem + '</p>' 
+                            }else if(array[index+1]?.includes("__PLACEHOLDER_LIST_CONTENT__")){
+                                listHTML +=  sanitizedItem + '</p></li>' 
                             }else{
                                 listHTML +=  sanitizedItem + '</p>' 
                             }
                     }
                 } else {
-                    // If not inside a list, treat it as regular paragraph content
+                    if(currentSubList){
+                        listHTML += currentSubList + '</li></ol></div>'
+                        currentSubList = ''
+                    }
                     listHTML += `<p>${sanitizedItem}</p>`;
                 }
             }
         });
-    
-        // Close the list if we were inside a list
-        if (inList) {
-            inList = false;
-        }
+        inList = false;
+        
         return listHTML;
-    }else{
-        return ''
     }
 }
 function generateSubList(list){
         // console.log(list)
     // list.forEach((item, index,array) => {
     // })
+
+}
+
+function removePlaceHolder(str){
+    return str.replace(/__PLACEHOLDER_LIST_CONTENT__|__PLACEHOLDER_SUB_LIST_CONTENT__/g, '');
 
 }
 
@@ -418,7 +457,7 @@ function generateSection(ChapValue:any, chapterNumber:any){
         const sectionName = text.split(sectionNumber)[1];
         
         const generatedContent = generateContent(ChapValue.value);
-        // const generatedListContent = createList(ChapValue.value)
+    
         // const generatedSubList = generateSubList(generatedListContent)
 
 
