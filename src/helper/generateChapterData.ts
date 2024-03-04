@@ -233,7 +233,7 @@ function createList(list) {
         let inList = false; // Flag to track whether we're currently inside a list
         let listHTML = ''; // Variable to store the generated list HTML
 
-        let patternMatchSublist = /^(\b(?![0-9]{3}\.)\d+(\.\d+|\.\d+\.[a-zA-Z]|\.[a-zA-Z])\b)/g;
+        let patternMatchSublist = /^(\b(?![0-9]{3}\.)\d{0,2}(\.\d+|\.\d+\.[a-zA-Z]|\.[a-zA-Z])\b)/g;
         let currentSubList = ''
         const regex  =/^(\d+(\.\d+)?\.)/;
 
@@ -241,7 +241,7 @@ function createList(list) {
              // Use regex to find matches in the item
              const match =  item.replace('__PLACEHOLDER_LIST_CONTENT__ ', '').trim().match(regex);
              const patternMatch = item.replace('__PLACEHOLDER_LIST_CONTENT__ ', '').trim().match(patternMatchSublist)
-             if (match && patternMatch?.length>0) {
+             if (match && patternMatch?.length>0 && !item.includes('__PLACEHOLDER_LIST_CONTENT__')) {
                  // If a match is found, return an array with the full number and the rest of the string
                  return [match[0], item.substring(match[0].length)];
              } else {
@@ -249,8 +249,11 @@ function createList(list) {
                  return item;
              }
          });
-        list = list.map(item =>  {
-            let matches = item.replace('__PLACEHOLDER_LIST_CONTENT__ ', '').trim().match(patternMatchSublist);
+        list = list.map((item, index,array) =>  {
+            if(item.includes('Not less than 1 percent using a skylight’s VT rating; ')){
+                console.log('')
+             }
+            let matches = item.replace(/LACEHOLDER_LIST_CONTENT__|__PLACEHOLDER_LIST_CONTENT__/g, '').trim().match(patternMatchSublist);
             if(matches && matches.length>0 ){
                 return item =  '__PLACEHOLDER_SUB_LIST_CONTENT__ __PLACEHOLDER_LIST_CONTENT__' + ' ' + item 
             }else{
@@ -263,7 +266,7 @@ function createList(list) {
             if (item && item !== 'false' && item != undefined) {
                 
                 let sanitizedItem = convertOperatoresToXML(item); // You may need to define this function
-                if(sanitizedItem.includes('British thermal unit per hour ')){
+                if(sanitizedItem.includes('For SI: 1 British thermal unit per hour = 0.2931 W.')){
                     console.log(sanitizedItem)
                 }
                 if (  sanitizedItem.includes("__PLACEHOLDER_LIST_CONTENT__") ) {
@@ -283,8 +286,19 @@ function createList(list) {
                             listHTML +=  `<li><p><span class="label"> ${sanitizedItem}</span>`
                         }
                     }
-                    // Start a new list
-                    inList = true;
+
+
+                    // if(array[index+2]){
+                    //     inList = true;
+                    // }else{
+                    //     listHTML += '</p></li></ol></div>'
+                    // }
+                    if((array.length-1) == index){
+                        listHTML += '</p></li></ol></div>'
+                    }else{
+                        inList = true;
+                    }
+                    
                 } else if (inList) {
                     // If inside a list, add list item
                     if(!array[index]?.includes("__PLACEHOLDER_LIST_CONTENT__") && array[index+1] && !array[index+1].includes("__PLACEHOLDER_LIST_CONTENT__") ){

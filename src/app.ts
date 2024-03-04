@@ -14,10 +14,13 @@ import { routeNotFound } from "@utils/routeNotFound";
 import fileUpload from 'express-fileupload';
 
 const allowedOrigins = process.env.allowedOrigins
-const options: cors.CorsOptions = { origin: allowedOrigins };
+const options: cors.CorsOptions = { origin: '*' };
 
 dotenv.config();
 class App {
+    use(arg0: any) {
+        throw new Error("Method not implemented.");
+    }
     public app: express.Application;
     public port?: string | number;
     public env?: string;
