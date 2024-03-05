@@ -1,4 +1,14 @@
-export const bookShortCode = 'VAEBC2021P1'
+export let bookShortCode = 'VAEBC2021P1'
+
+export function setBookShortCode(newShortCode: string): void {
+    bookShortCode = newShortCode;
+}
+
+export let bookTitle = ''
+export function setBookTitle(title: string): void {
+    bookTitle = title;
+}
+
 
 export function getAllPTagData(withoutTOC:any){
     let getAllPTag = [];

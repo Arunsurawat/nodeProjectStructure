@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelli Parse Hub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            border: none;
+            padding: 0;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Intelli Parse Hub</h1>
+    </header>
+    <div class="content">
+        <form action="/pdf-to-xml/create" method="POST"  enctype="multipart/form-data">
+            <div>
+                <label for="bookShortCode">Book Short Code:</label>
+                <input type="text" id="bookShortCode" name="bookShortCode" placeholder="Type book short code" required>
+            </div>
+            <div>
+                <label for="bookTitle">Book Title:</label>
+                <input type="text" id="bookTitle" name="bookTitle" placeholder="Type book title" required>
+            </div>
+            <div>
+                <label for="file">Upload File:</label>
+                <input type="file" id="file" name="file" accept=".xml" required>
+            </div>
+            <div>
+                <button id="submitButton" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+    <footer>
+        <p>Footer</p>
+    </footer>
+</body>
+</html>

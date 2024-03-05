@@ -12,11 +12,21 @@ import { findTOC, removeTOC } from '@utils/findTableOfContent'
 import { generateChapterSection } from "@/utils/chapaterSection";
 import { generateAllDataArray } from "@/utils/generateAllDataArray";
 import { generateTocContent } from "@/helper/generateTocContent";
-import { configrationCheck, configrationSetBookName, getAllPTagData,bookShortCode } from "@/helper/common";
+import { configrationCheck, configrationSetBookName, getAllPTagData,bookShortCode ,setBookShortCode, setBookTitle} from "@/helper/common";
 import { generateChapterData } from "@/helper/generateChapterData";
 declare module 'express' {
     interface Request {
         file: { [key: string]: UploadedFile[] };
+    }
+
+    interface  Response  {
+        req : {
+            file: {
+                name: string;
+                originalname : string
+                data: Buffer;
+            };
+        }
     }
 }
 
@@ -29,7 +39,7 @@ class PdfToXmlController {
             // res.status(200).send("<h1>PDF TO XML</h1>")
             // console.log("REQ FILE 1 ========", req);
             // console.log("REQ FILE 2 ========", req.file);
-            const uploadedFile = req.file as UploadedFile;
+            const uploadedFile = req.file ? req.body.file : '' as UploadedFile;
             // console.log({ uploadedFile })
             if (!uploadedFile) {
                 return res.status(400).json({ error: 'No file uploaded.' });
@@ -62,15 +72,18 @@ class PdfToXmlController {
 
     public createXml = (req: Request, res: Response, next: NextFunction) => {
         try {
-            // res.status(200).send("<h1>PDF TO XML</h1>")
-            // console.log("REQ FILE 1 ========", req);
-            // console.log("REQ FILE 2 ========", req.file);
-            const uploadedFile = req.file as UploadedFile;
+            let uploadedFile = req.file  as UploadedFile;
             if (!uploadedFile) {
                 return res.status(400).json({ error: 'No  file uploaded.' });
             }
-            console.log({ uploadedFile })
-
+            if(!req.body.bookShortCode){
+                return res.status(400).json({ error: 'bookShortCode : This field is required.' });
+            }
+            if(!req.body.bookTitle){
+                return res.status(400).json({ error: 'bookTitle : This field is required.' });
+            }
+            setBookShortCode(req.body.bookShortCode);
+            setBookTitle(req.body.bookTitle)
             // Read XML file content
             // const xmlData: string = fs.readFileSync(uploadedFile.path, 'utf-8');
 
@@ -274,7 +287,7 @@ class PdfToXmlController {
                 
                         
                 
-// ------------------------------------------------------------------------------------------
+                                // ------------------------------------------------------------------------------------------
 
 
                 const generatedChapterData:any = generateChapterData(withoutTOCAllPTagData, finalTocArray)
@@ -294,8 +307,7 @@ class PdfToXmlController {
                     // const snatizeXml = generatedChapterData && generatedChapterData.forEach(element => {
                     //     return element.unescapeXml;
                     // });
-                    const finalXML = `
-                    <?xml version="1.0" encoding="UTF-8"?>
+                    const finalXML = `<?xml version="1.0" encoding="UTF-8"?>
                         <!DOCTYPE iccxml SYSTEM "iccxml.dtd">
                         <iccxml
                             xmlns="http://www.w3.org/1999/xhtml"
@@ -321,12 +333,11 @@ class PdfToXmlController {
                             </body>
                     </iccxml>`;
                     // console.log({ finalXML })
-                    res.status(200).send(finalXML);
-                    
-                    
-                })
 
-            
+                    // Set headers for file download
+                    res.setHeader('Content-Disposition', `attachment; filename=output_${res.req.file.originalname}`);
+                    res.status(200).send(finalXML);
+                })            
         })
 
         } catch (error) {

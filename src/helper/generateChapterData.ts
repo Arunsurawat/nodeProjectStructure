@@ -250,9 +250,7 @@ function createList(list) {
              }
          });
         list = list.map((item, index,array) =>  {
-            if(item.includes('Not less than 1 percent using a skylight’s VT rating; ')){
-                console.log('')
-             }
+
             let matches = item.replace(/LACEHOLDER_LIST_CONTENT__|__PLACEHOLDER_LIST_CONTENT__/g, '').trim().match(patternMatchSublist);
             if(matches && matches.length>0 ){
                 return item =  '__PLACEHOLDER_SUB_LIST_CONTENT__ __PLACEHOLDER_LIST_CONTENT__' + ' ' + item 
@@ -266,9 +264,7 @@ function createList(list) {
             if (item && item !== 'false' && item != undefined) {
                 
                 let sanitizedItem = convertOperatoresToXML(item); // You may need to define this function
-                if(sanitizedItem.includes('For SI: 1 British thermal unit per hour = 0.2931 W.')){
-                    console.log(sanitizedItem)
-                }
+      
                 if (  sanitizedItem.includes("__PLACEHOLDER_LIST_CONTENT__") ) {
                     if(!array[index-2]?.includes("__PLACEHOLDER_LIST_CONTENT__") ){
                         listHTML +=  `<div class="list"><ol class="no_mark"><li><p><span class="label">${sanitizedItem}</span>`
