@@ -1,4 +1,4 @@
-import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid ,bookShortCode, areSimilar} from "./common";
+import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid ,bookShortCode, areSimilar, convertSubSectionXML} from "./common";
 
 export function generateChapterData(data: any, originalDataObject:any) {
 
@@ -105,11 +105,11 @@ export function generateChapterData(data: any, originalDataObject:any) {
 
                 const removetheCommaFromAppendixXml = Array.isArray(validAppendixXml) ? validAppendixXml.join() : validAppendixXml;
                 const finalAppendix = removetheCommaFromAppendixXml ? removetheCommaFromAppendixXml : "";
-                // return `</section>${finalAppendix}`;
+                // return `</section>${finalAppendix}`;       
                 if (index === 0) {
-                return `</section>  <section id="Bookshortcode_AppxA" class="appendix" epub:type="appendix"> ${finalAppendix} </section>`;
+                    return `</section>  <section id="${bookShortCode}_Appx" class="appendix" epub:type="appendix"> ${finalAppendix} </section>`;
                 } else {
-                    return `</section>  <section id="Bookshortcode_AppxA" class="appendix" epub:type="appendix"> ${finalAppendix}`;
+                    return `</section>  <section id="${bookShortCode}_AppxA" class="appendix" epub:type="appendix"> ${finalAppendix}`;
                 }
                
 
@@ -189,7 +189,7 @@ function generateChapContent(content) {
     } 
 }
 
-function generateContent(content) {
+function generateContent(ChapterData,ChapterNumber) {
     // if (content?.length > 0) {
     //     const result = content.map((data, index) => {
     //         if (data !== 'false') {
@@ -202,7 +202,22 @@ function generateContent(content) {
     //     return result.join('');
     // }
 
-    let generatedData = createList(content)
+    // let xmlOutput ='';
+    
+    // ChapterData.forEach((data) => {
+    //     if (data.startsWith("__PLACEHOLDER_LIST_CONTENT__")) {
+    //         xmlOutput += createList(ChapterData);
+    //     } else {
+    //         xmlOutput += convertSubSectionXML(ChapterData);
+    //     }
+    // });
+    // return xmlOutput;
+    
+    
+    
+    // const generateSubSection = convertSubSectionXML(ChapterData);
+    // return generateSubSection;
+    let generatedData = createList(ChapterData,ChapterNumber)
     generatedData = generatedData.replace(/__PLACEHOLDER_LIST_CONTENT__|__PLACEHOLDER_SUB_LIST_CONTENT__/g, '');
     return generatedData
 
@@ -227,7 +242,7 @@ function generateContent(content) {
 //         // return getContentData.join('');
 //     }
 // }
-function createList(list) {
+function createList(list, ChapterNumber) {
     if(list){
         list = list.filter(item =>  item != '' );
         let inList = false; // Flag to track whether we're currently inside a list
@@ -322,7 +337,7 @@ function createList(list) {
                         listHTML += currentSubList + '</li></ol></div>'
                         currentSubList = ''
                     }
-                    listHTML += `<p>${sanitizedItem}</p>`;
+                    listHTML += convertSubSectionXML(sanitizedItem, ChapterNumber);
                 }
             }
         });
@@ -465,8 +480,8 @@ function generateSection(ChapValue:any, chapterNumber:any){
         const heading = text.split(" ")[0];
         const sectionNumber = heading ? text.split(" ")[1] : text.split(" ")[0];
         const sectionName = text.split(sectionNumber)[1];
-        
-        const generatedContent = generateContent(ChapValue.value);
+        const generateBookShortCode = `${bookShortCode}_Ch${chapterNumber}_Sec`;
+        const generatedContent = generateContent(ChapValue.value, generateBookShortCode);
     
         // const generatedSubList = generateSubList(generatedListContent)
 
@@ -491,11 +506,11 @@ function generateAppendix(ChapValue: any) {
         const heading = text.split(" ")[0];
         const sectionNumber = heading ? text.split(" ")[1] : text.split(" ")[0];
         const appendixName = ChapValue?.value[0];
-
-        const generatedContent = generateContent(ChapValue.value);
+        const generateBookShortCode = `${bookShortCode}_AppxE_SecE`;
+        const generatedContent = generateContent(ChapValue.value, generateBookShortCode);
 
         const removetheComma = Array.isArray(generatedContent) ? generatedContent.join() : generatedContent;
-        const finalContent = removetheComma !== undefined ? removetheComma : '';
+        const finalContent = removetheComma !== undefined ? removetheComma : '';          
         return `
                 <header>
                 <h1 class="appendix" epub:type="title"><span class="label" epub:type="label">APPENDIX</span><span class="appendix_number" epub:type="ordinal">${sectionNumber}</span><br/><span class="appendix_title" epub:type="title">${appendixName}</span></h1>

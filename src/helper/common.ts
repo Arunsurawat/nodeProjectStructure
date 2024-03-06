@@ -292,6 +292,46 @@ export function areSimilar(s1, s2, threshold) {
     // Return true if the number of matching characters exceeds the threshold
     return matchCount >= threshold;
 }
+
+
+export const convertSubSectionXML = (ChapterData: any, ChapterNumber:any) => {
+    let xmlOutput = '';
+    const parseSection = (data:any) => {
+        let match = data?.match(/(\d+\.\d+(\.\d+)*)\s*(.*)/);
+        
+        if(match){
+            let [, sectionNumber, , sectionTitle] = match;
+            let sectionContent = data.replace(/^\d+\.\d+(\.\d+)*\s*(.*)/, '$1').trim();
+
+            xmlOutput += `<section id="${ChapterNumber}${sectionNumber}" class="level${sectionNumber.split('.').length }">\n`;
+            xmlOutput += `\t<h1 class="level${sectionNumber.split('.').length }">\n`;
+            xmlOutput += `\t\t<span class="section_number" epub:type="ordinal">${sectionNumber}</span>\n`;
+            xmlOutput += `\t\t<span class="level${sectionNumber.split('.').length}_title" epub:type="title">${sectionTitle}</span>\n`;
+            xmlOutput += `\t</h1>\n`;
+            xmlOutput += `\t<p>${sectionContent}</p>\n`;
+
+            // Look for subsections recursively
+            let nextIndex = ChapterData.indexOf(data) + 1;
+            if (nextIndex < ChapterData.length) {
+                let nextData = ChapterData[nextIndex];
+                let nextMatch = nextData.match(new RegExp(`^${sectionNumber}(\\.\\d+)+\\s*.*`));
+                if (nextMatch) {
+                    xmlOutput += parseSection(nextData);
+                }
+            }
+
+            xmlOutput += `</section>\n`;
+            return xmlOutput;
+        }else {
+            return `<p>${data}</p>`
+        }
+        
+    };
+    parseSection(ChapterData);
+    return xmlOutput;
+}
+
+
 // export const originalDataObject = {
 //     "PART0": "Part I—Administrative",
 //     "CHAPTER1": "CHAPTER 1 SCOPE AND ADMINISTRATION   1-1 DIVISION I—CALIFORNIA ADMINISTRATION",
