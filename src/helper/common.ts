@@ -294,17 +294,56 @@ export function areSimilar(s1, s2, threshold) {
 }
 
 
-export const convertSubSectionXML = (ChapterData: any, ChapterNumber:any) => {
-    let xmlOutput = '';
-    const parseSection = (data:any) => {
-        let match = data?.match(/(\d+\.\d+(\.\d+)*)\s*(.*)/);
+// export const convertSubSectionXML = (ChapterData: any, ChapterNumber:any) => {
+//     let xmlOutput = '';
+//     const parseSection = (data:any) => {
+//         let match = data?.match(/(\d+\.\d+(\.\d+)*)\s*(.*)/);
         
-        if(match){
+//         if(match){
+//             let [, sectionNumber, , sectionTitle] = match;
+//             let sectionContent = data.replace(/^\d+\.\d+(\.\d+)*\s*(.*)/, '$1').trim();
+
+//             xmlOutput += `<section id="${ChapterNumber}${sectionNumber}" class="level${sectionNumber.split('.').length }">\n`;
+//             xmlOutput += `\t<h1 class="level${sectionNumber.split('.').length }">\n`;
+//             xmlOutput += `\t\t<span class="section_number" epub:type="ordinal">${sectionNumber}</span>\n`;
+//             xmlOutput += `\t\t<span class="level${sectionNumber.split('.').length}_title" epub:type="title">${sectionTitle}</span>\n`;
+//             xmlOutput += `\t</h1>\n`;
+//             xmlOutput += `\t<p>${sectionContent}</p>\n`;
+
+//             // Look for subsections recursively
+//             let nextIndex = ChapterData.indexOf(data) + 1;
+//             if (nextIndex < ChapterData.length) {
+//                 let nextData = ChapterData[nextIndex];
+//                 let nextMatch = nextData.match(new RegExp(`^${sectionNumber}(\\.\\d+)+\\s*.*`));
+//                 if (nextMatch) {
+//                     xmlOutput += parseSection(nextData);
+//                 }
+//             }
+
+//             xmlOutput += `</section>\n`;
+//             return xmlOutput;
+//         }else {
+//             xmlOutput += `<p>${data}</p>`
+//             return xmlOutput;
+//         }
+        
+//     };
+//     parseSection(ChapterData);
+//     return xmlOutput;
+// }
+
+export const convertSubSectionXML = (ChapterData, ChapterNumber) => {
+    let xmlOutput = '';
+
+    const parseSection = (data) => {
+        let match = data.match(/^(\d+\.\d+(\.\d+)*)\s*(.*)/);
+
+        if (match) {
             let [, sectionNumber, , sectionTitle] = match;
             let sectionContent = data.replace(/^\d+\.\d+(\.\d+)*\s*(.*)/, '$1').trim();
 
-            xmlOutput += `<section id="${ChapterNumber}${sectionNumber}" class="level${sectionNumber.split('.').length }">\n`;
-            xmlOutput += `\t<h1 class="level${sectionNumber.split('.').length }">\n`;
+            xmlOutput += `<section id="${ChapterNumber}${sectionNumber}" class="level${sectionNumber.split('.').length}">\n`;
+            xmlOutput += `\t<h1 class="level${sectionNumber.split('.').length}">\n`;
             xmlOutput += `\t\t<span class="section_number" epub:type="ordinal">${sectionNumber}</span>\n`;
             xmlOutput += `\t\t<span class="level${sectionNumber.split('.').length}_title" epub:type="title">${sectionTitle}</span>\n`;
             xmlOutput += `\t</h1>\n`;
@@ -321,15 +360,16 @@ export const convertSubSectionXML = (ChapterData: any, ChapterNumber:any) => {
             }
 
             xmlOutput += `</section>\n`;
-            return xmlOutput;
-        }else {
-            return `<p>${data}</p>`
+        } else {
+            xmlOutput += `<p>${data}</p>`;
         }
-        
     };
+
     parseSection(ChapterData);
     return xmlOutput;
 }
+
+
 
 
 // export const originalDataObject = {

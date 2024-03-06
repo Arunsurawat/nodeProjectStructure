@@ -53,7 +53,7 @@ export function generateChapterData(data: any, originalDataObject:any) {
                                 // return data;
                                 const chapterObject = breakArrayIntoKeyValuePairs(data);
                                 const verifiedArrayLastIndex =verifiedData?.length > 0 && verifiedData[verifiedData.length -1] 
-                                const getIndex = verifiedData.length == 0 ? -1 : verifiedArrayLastIndex.map(el => el.key).indexOf(chapterObject[0].key);
+                                const getIndex = verifiedData.length == 0 ? -1 : verifiedArrayLastIndex.map(el => el.key)?.indexOf(chapterObject[0]?.key);
                                 if (getIndex == -1){
                                     verifiedData.push(chapterObject);
                                     

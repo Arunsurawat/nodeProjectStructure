@@ -103,14 +103,15 @@ class PdfToXmlController {
                 });
 
                 // Replace <H1>, <H2>, <H3>, <H4>, <H5>, and <H6>, <P>, <L>, <LI>, <Lbl>, and <LBody> tags
-               modifiedData = modifiedData.replace(/<\s*(\/)?\s*(H[1-6]|Lbl|LBody|Div)(\s+[^>]*)?>/g, (match, p1, p2) => {
+            //    modifiedData = modifiedData.replace(/<\s*(\/)?\s*(H[1-6]|Lbl|LBody|Div)(\s+[^>]*)?>/g, (match, p1, p2) => {
+                modifiedData = modifiedData.replace(/<\s*(\/)?\s*(H[1-6]|Lbl|LBody)(\s+[^>]*)?>/g, (match, p1, p2) => {
         
-                if (p1 === '/') {
-                    return '</P>'; // Closing tag
-                } else {
-                    return  match == '<Lbl>' ? '<P> __PLACEHOLDER_LIST_CONTENT__ ' : '<P>'; // Opening tag
-                }
-            });
+                    if (p1 === '/') {
+                        return '</P>'; // Closing tag
+                    } else {
+                        return  match == '<Lbl>' ? '<P> __PLACEHOLDER_LIST_CONTENT__ ' : '<P>'; // Opening tag
+                    }
+                });
 
                 // Remove the <Part> and </Part> tags 
                 modifiedData = modifiedData.replace(/<Part>(.*?)<\/Part>/gs, '$1');
@@ -118,7 +119,8 @@ class PdfToXmlController {
 
                 // Remove the <Sect> and </Sect> tags and <Sect />
                 // const pattern = /<Sect\s*\/?>|<\/Sect>/g;
-                const pattern = /<Sect\s*\/?>|<\/Sect>|<L\s*\/?>|<\/L>|<LI\s*\/?>|<\/LI>/g;
+                // const pattern = /<Sect\s*\/?>|<\/Sect>|<L\s*\/?>|<\/L>|<LI\s*\/?>|<\/LI>/g;
+                const pattern = /<Sect\s*\/?>|<\/Sect>|<L\s*\/?>|<\/L>|<Div\s*\/?>|<\/Div>|<LI\s*\/?>|<\/LI>/g;
 
                 modifiedData = modifiedData.replace(pattern, '');
 
