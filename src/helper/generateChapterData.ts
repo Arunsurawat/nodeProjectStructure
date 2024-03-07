@@ -218,7 +218,7 @@ function generateContent(ChapterData,ChapterNumber) {
     // const generateSubSection = convertSubSectionXML(ChapterData);
     // return generateSubSection;
     let generatedData = createList(ChapterData,ChapterNumber)
-    generatedData = generatedData.replace(/__PLACEHOLDER_LIST_CONTENT__|__PLACEHOLDER_SUB_LIST_CONTENT__/g, '');
+    generatedData = generatedData?.replace(/__PLACEHOLDER_LIST_CONTENT__|__PLACEHOLDER_SUB_LIST_CONTENT__/g, '');
     return generatedData
 
 }

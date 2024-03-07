@@ -1,4 +1,4 @@
-export let bookShortCode = 'VAEBC2021P1'
+export let bookShortCode = ''
 
 export function setBookShortCode(newShortCode: string): void {
     bookShortCode = newShortCode;
@@ -155,11 +155,11 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
         const potentialKey = words && words[0];
 
         if (validKeys.has(potentialKey)) {
-            if (currentKey !== null) {
+            if (currentValue && currentKey !== null && typeof currentKey === 'string') {
                 // if (validKeys.has(currentKey.split(" ")[0]) && currentValue == '') {
                 //     currentValue = item.split(currentKey)[1];
                 // }
-                outputArray.push({ key: currentKey, value: currentValue.trim().split('\n') });
+                outputArray.push({ key: currentKey, value: currentValue?.trim().split('\n') });
                 currentValue = '';
             }
             if (item.startsWith('APPENDIX')){
@@ -182,7 +182,7 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
         if (validKeys.has(currentKey.split(" ")[0]) && currentValue ==''){
             currentValue = inputArray[0].split(currentKey)[1];
         }
-        outputArray.push({ key: currentKey, value: currentValue.trim().split('\n') });
+        outputArray.push({ key: currentKey, value: currentValue?.trim().split('\n') });
         currentValue = ''
     }
 
