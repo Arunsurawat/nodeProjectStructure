@@ -1,4 +1,4 @@
-import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid ,bookShortCode, areSimilar, convertSubSectionXML} from "./common";
+import { breakArrayIntoChapters, breakArrayIntoKeyValuePairs, cleanString, configrationCheck, configrationSetBookName, convertOperatoresToXML, originalDataObject, removeNumber, removeNumbersFromKeys, unescapeXml, unescapeXmlTOValid ,bookShortCode, areSimilar, convertSubSectionXML, bookTitle} from "./common";
 
 export function generateChapterData(data: any, originalDataObject:any) {
 
@@ -11,10 +11,14 @@ export function generateChapterData(data: any, originalDataObject:any) {
     
     // const firstKey = Object.keys(originalObject[0])[0];
     // console.log({ firstKey });
-    const bookName = configrationSetBookName(data).toUpperCase();
+    const bookName = bookTitle;
+    // const bookName = configrationSetBookName(data).toUpperCase();
     const chapterArray = data.length > 0 &&  data.map((chapterData) =>{        
         if (chapterData && typeof chapterData === 'string') {
-            return chapterData.replace((bookName), "");
+            if(bookName){
+                chapterData.replace((bookName), "");
+            }
+            return chapterData
         }
        
     });

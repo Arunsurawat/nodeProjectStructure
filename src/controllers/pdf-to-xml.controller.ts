@@ -12,7 +12,7 @@ import { findTOC, removeTOC } from '@utils/findTableOfContent'
 import { generateChapterSection } from "@/utils/chapaterSection";
 import { generateAllDataArray } from "@/utils/generateAllDataArray";
 import { generateTocContent } from "@/helper/generateTocContent";
-import { configrationCheck, configrationSetBookName, getAllPTagData,bookShortCode ,setBookShortCode, setBookTitle} from "@/helper/common";
+import { configrationCheck, configrationSetBookName, getAllPTagData,bookShortCode ,setBookShortCode, setBookTitle, bookTitle} from "@/helper/common";
 import { generateChapterData } from "@/helper/generateChapterData";
 declare module 'express' {
     interface Request {
@@ -178,7 +178,8 @@ class PdfToXmlController {
                 
                     const newData = tocData?.TOC?.P.join()
                    
-                    const bookName = configrationSetBookName(withoutTOCAllPTagData); 
+                    // const bookName = configrationSetBookName(withoutTOCAllPTagData); 
+                    const bookName = bookTitle 
 
                     const regexPattern = /\s*\.\s*\.\s*(?=[a-zA-Z\d]+)/g;
                     let outputArray = newData && newData.split(regexPattern).map((segment, index) => {
@@ -197,7 +198,9 @@ class PdfToXmlController {
                         element = element.replace("TABLE OF CONTENTS ", "").trim();
                         element = element.replace(/\.(?!\d)|[,]/g, '').trim();
                         // remove Book name in list
-                        element = element.replace((bookName).toUpperCase(), "")
+                        if(bookName){
+                            element = element.replace((bookName).toUpperCase(), "")
+                        }
                         return element
 
                         
