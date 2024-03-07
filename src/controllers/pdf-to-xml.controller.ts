@@ -12,7 +12,7 @@ import { findTOC, removeTOC } from '@utils/findTableOfContent'
 import { generateChapterSection } from "@/utils/chapaterSection";
 import { generateAllDataArray } from "@/utils/generateAllDataArray";
 import { generateTocContent } from "@/helper/generateTocContent";
-import { configrationCheck, configrationSetBookName, getAllPTagData,bookShortCode ,setBookShortCode, setBookTitle} from "@/helper/common";
+import { configrationCheck, configrationSetBookName, getAllPTagData,bookShortCode ,setBookShortCode, setBookTitle, convertOperatoresToXML} from "@/helper/common";
 import { generateChapterData } from "@/helper/generateChapterData";
 declare module 'express' {
     interface Request {
@@ -123,6 +123,8 @@ class PdfToXmlController {
                 const pattern = /<Sect\s*\/?>|<\/Sect>|<L\s*\/?>|<\/L>|<Div\s*\/?>|<\/Div>|<LI\s*\/?>|<\/LI>/g;
 
                 modifiedData = modifiedData.replace(pattern, '');
+                modifiedData = modifiedData.replace("&#2;", '');
+
 
                 
                 modifiedData = modifiedData.replace(/(CHAPTER|APPENDIX)(\d+|\w+)/g, function (match, p1, p2) {
@@ -198,6 +200,7 @@ class PdfToXmlController {
                         element = element.replace(/\.(?!\d)|[,]/g, '').trim();
                         // remove Book name in list
                         element = element.replace((bookName).toUpperCase(), "")
+                        element = convertOperatoresToXML(element);
                         return element
 
                         

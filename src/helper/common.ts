@@ -152,7 +152,7 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
 
     for (const item of inputArray) {
         const words = typeof item ==='string'&& item.split(' ');
-        const potentialKey = words && words[0].toUpperCase();
+        const potentialKey = words && words[0];
 
         if (validKeys.has(potentialKey)) {
             if (currentKey !== null) {
@@ -214,6 +214,29 @@ export function breakArrayIntoKeyValuePairs(inputArray) {
 // }
 
 export function configrationCheck(text) {
+    const configrationCheckChapter = 'CHAPTER,SUBCHAPTER';
+    const configrationCheckSection = 'Division,SECTION';
+    const configrationCheckPart = 'PART,Part,DIVISION';
+    const configrationCheckAppendix = 'APPENDIX,Resource';
+    // console.log({text});
+    const textValue = typeof text === "string" && text?.split(" ")[0]?.trim();
+    if (configrationCheckChapter.includes(textValue)) {
+        // console.log("in==", textValue)
+        return "CHAPTER"
+    };
+    if (configrationCheckSection.includes(textValue)) {
+        return "SECTION";
+    }
+    if (configrationCheckPart.includes(textValue)) {
+        return "PART";
+    }
+    if (configrationCheckAppendix.includes(textValue)) {
+        return "APPENDIX";
+    }
+
+}
+
+export function configrationCheckTOC(text) {
     const configrationCheckChapter = 'CHAPTER,SUBCHAPTER';
     const configrationCheckSection = 'Section,Division,SECTION';
     const configrationCheckPart = 'PART,Part,DIVISION';

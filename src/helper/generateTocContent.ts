@@ -1,4 +1,4 @@
-import { configrationCheck, removeNumbersFromKeys } from "./common";
+import { configrationCheckTOC, removeNumbersFromKeys } from "./common";
 
 export function generateTocContent(data:any) {
     const newArray = removeNumbersFromKeys(data);
@@ -82,7 +82,7 @@ function generateChapter(chapter: any) {
         // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", chapter)
         // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", ChapValue)
 
-        if (configrationCheck(ChapValue) === "CHAPTER") {
+        if (configrationCheckTOC(ChapValue) === "CHAPTER") {
             const text = chapter[ChapValue]?.trim();
             const heading = text.split(" ")[0];
             const chapterNumber = text.split(" ")[1];
@@ -97,7 +97,7 @@ function generateChapter(chapter: any) {
                             </p>`
         }
         
-        if (configrationCheck(ChapValue) === "APPENDIX") {
+        if (configrationCheckTOC(ChapValue) === "APPENDIX") {
             const text = chapter[ChapValue]?.trim();
             const heading = text.split(" ")[0];
             const chapterNumber = text.split(" ")[1];
@@ -122,7 +122,7 @@ function generateSection(data: any) {
     for (const chapter in data) {
         // console.log("#####################################chapter in data######", chapter, data);
 
-        if (configrationCheck(chapter) === "SECTION") {
+        if (configrationCheckTOC(chapter) === "SECTION") {
             const sectionArray = data[chapter];
             // console.log({ sectionArray })
 
@@ -175,7 +175,7 @@ function generateSection(data: any) {
 //     for (const chapter in data) {
 //         console.log("#####################################chapter in data######", chapter, data);
 
-//         if (configrationCheck(chapter) === "SECTION") {
+//         if (configrationCheckTOC(chapter) === "SECTION") {
             
 //             const sectionArray = data[chapter];
 //             console.log({ sectionArray })
