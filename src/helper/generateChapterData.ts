@@ -277,6 +277,9 @@ function createList(list, ChapterNumber) {
 
 
         list.forEach((item, index,array) => {
+            if(item.includes('covers or plugs immediately replaced in openings')){
+                console.log('item:- ',item)
+            }
             if (item && item !== 'false' && item != undefined) {
                 
                 let sanitizedItem = convertOperatoresToXML(item); // You may need to define this function
@@ -323,6 +326,9 @@ function createList(list, ChapterNumber) {
                     }else{
                             if(currentSubList){
                                 currentSubList += sanitizedItem + '</p></li>'
+                                if(index === array.length-1){
+                                    listHTML += currentSubList += '</ol></li></ol></div>'
+                                }
                             }else if(index == array.length-1 ){
                                 listHTML +=  sanitizedItem + '</p></li> </ol></div>' 
                             }else if(array[index+1]?.includes("__PLACEHOLDER_SUB_LIST_CONTENT__")){
