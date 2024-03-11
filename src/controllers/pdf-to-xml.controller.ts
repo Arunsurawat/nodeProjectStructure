@@ -123,7 +123,7 @@ class PdfToXmlController {
                 const pattern = /<Sect\s*\/?>|<\/Sect>|<L\s*\/?>|<\/L>|<Div\s*\/?>|<\/Div>|<LI\s*\/?>|<\/LI>/g;
 
                 modifiedData = modifiedData.replace(pattern, '');
-                modifiedData = modifiedData.replace("&#2;", '');
+                modifiedData = modifiedData.replace(/&#2;/g, '');
 
 
                 
