@@ -193,7 +193,6 @@ class PdfToXmlController {
                             return segment.split(' ').slice(1).join(' ');
                         }
                     });
-                    console.log({ outputArray })
                     outputArray = outputArray.length > 0 && outputArray.map(function (element) {
                         // Remove periods and commas from the result
                         element = element.replace("TABLE OF CONTENTS ", "").trim();
@@ -309,7 +308,7 @@ class PdfToXmlController {
                 // new apparoach end
 
                 
-                    const generatedTOC =generateTocContent(finalTocArray).join();
+                    const generatedTOC =generateTocContent(finalTocArray).join('');
                     // console.log("*******************", generatedChapterData)
                     // const snatizeXml = generatedChapterData && generatedChapterData.forEach(element => {
                     //     return element.unescapeXml;
@@ -334,7 +333,6 @@ class PdfToXmlController {
                                             </nav>
                                         </section>
                                         ${generatedChapterData}
-                                        </section>
                                     </section>
                                 </section>
                             </body>

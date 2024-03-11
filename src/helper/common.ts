@@ -422,11 +422,12 @@ export const convertSubSectionXML = (ChapterData, ChapterNumber) => {
 
             xmlOutput += `</section>\n`;
         } else {
-            xmlOutput += `<p>${data}</p>`;
+            xmlOutput += `<p>${data ?? ''}</p>`;
         }
     };
-
-    parseSection(ChapterData);
+    if(ChapterData){
+        parseSection(ChapterData);
+    }
     return xmlOutput;
 }
 

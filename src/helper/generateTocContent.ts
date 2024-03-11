@@ -7,7 +7,9 @@ export function generateTocContent(data:any) {
         
         
         
-        
+        if(!chapter){
+            return
+        }
         let chapterNumber = '';
         let chapterName = '';
         // let sectionView = "";
@@ -88,9 +90,9 @@ function generateChapter(chapter: any) {
             const chapterNumber = text.split(" ")[1];
             const chapterName = text.substring(heading.length + 1 + chapterNumber?.length + 1);
             result = `<p>
-                                <span class="label">${heading} </span>
-                                <span class="ordinal">${chapterNumber}</span>
-                                <span class="text"> ${chapterName} </span>
+                                <span class="label">${heading ?? ''} </span>
+                                <span class="ordinal">${chapterNumber ?? ''}</span>
+                                <span class="text"> ${chapterName ?? ''} </span>
                                 <span class="locator">
                                     <a class="toc_pages" href="#VAEBC2021P1_Ch01">1-1</a>
                                 </span>
@@ -103,9 +105,9 @@ function generateChapter(chapter: any) {
             const chapterNumber = text.split(" ")[1];
             const chapterName = text.substring(heading.length + 1 + chapterNumber?.length + 1);
             result = `<p>
-                                <span class="label">${heading} </span>
-                                <span class="ordinal">${chapterNumber}</span>
-                                <span class="text"> ${chapterName} </span>
+                                <span class="label">${heading ?? ''} </span>
+                                <span class="ordinal">${chapterNumber ?? ''}</span>
+                                <span class="text"> ${chapterName ?? ''} </span>
                                 <span class="locator">
                                     <a class="toc_pages" href="#VAEBC2021P1_Ch01">1-1</a>
                                 </span>
@@ -120,9 +122,8 @@ function generateSection(data: any) {
     let result = ''; // Initialize an empty string to accumulate the generated HTML
 
     for (const chapter in data) {
-        // console.log("#####################################chapter in data######", chapter, data);
 
-        if (configrationCheckTOC(chapter) === "SECTION") {
+        if (chapter && configrationCheckTOC(chapter) === "SECTION") {
             const sectionArray = data[chapter];
             // console.log({ sectionArray })
 
@@ -138,8 +139,8 @@ function generateSection(data: any) {
                     // Accumulate the generated HTML for each section
                     
                     result +=`<p>
-                                    <span class="ordinal">${sectionNumber}</span>
-                                    <span class="text">${sectionName} </span>
+                                    <span class="ordinal">${sectionNumber ?? ''}</span>
+                                    <span class="text">${sectionName ?? ''} </span>
                                     <span class="locator">
                                         <a class="toc_pages" href="#VAEBC2021P1_Ch01_Sec101">1-1</a>
                                     </span>
@@ -147,8 +148,6 @@ function generateSection(data: any) {
                 }
             } else {
                 const sectionHeading = data[chapter];
-                // console.log("_____________________", sectionHeading);
-
                 const text = typeof sectionHeading === 'string' && sectionHeading?.trim();
                 const heading = text.split(" ")[0].includes('Section') ? text.split(" ")[0] : 'Section';
                 const sectionNumber = heading ? text.split(" ")[1] : text.split(" ")[0];
@@ -156,8 +155,8 @@ function generateSection(data: any) {
 
                 // Accumulate the generated HTML for each section
                 result += `<p>
-                            <span class="ordinal">${sectionNumber}</span>
-                            <span class="text">${sectionName} </span>
+                            <span class="ordinal">${sectionNumber ?? ''}</span>
+                            <span class="text">${sectionName ?? ''} </span>
                             <span class="locator">
                                 <a class="toc_pages" href="#VAEBC2021P1_Ch01_Sec101">1-1</a>
                             </span>

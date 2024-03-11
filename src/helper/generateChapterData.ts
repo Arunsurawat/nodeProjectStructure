@@ -86,7 +86,9 @@ export function generateChapterData(data: any, originalDataObject:any) {
         // let generatedChapterXml = '';
         // let generatedSectionXml = '';
         
-
+        if(data.includes('undefined')){
+            console.log('5555555555')
+        }
         let currentChapterNumber = ''
         const result = currentChapter.map((ChapValue) => {
             if (configrationCheck(ChapValue.key) === "CHAPTER"){
@@ -124,7 +126,7 @@ export function generateChapterData(data: any, originalDataObject:any) {
         })
         return result.join('');
     })
-    return generatedXml
+    return generatedXml ?? ''
 
     
 
@@ -277,10 +279,10 @@ function createList(list, ChapterNumber) {
 
 
         list.forEach((item, index,array) => {
-            if(item.includes('covers or plugs immediately replaced in openings')){
+            if(item.includes('AND SKYLIGHT U-FACTORS')){
                 console.log('item:- ',item)
             }
-            if (item && item !== 'false' && item != undefined) {
+            if (item && item !== 'false' && item != 'undefined') {
                 
                 let sanitizedItem = convertOperatoresToXML(item); // You may need to define this function
       
