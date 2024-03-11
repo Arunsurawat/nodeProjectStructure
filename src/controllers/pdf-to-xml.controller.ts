@@ -201,6 +201,8 @@ class PdfToXmlController {
                         // remove Book name in list
                         element = element.replace((bookName).toUpperCase(), "")
                         element = convertOperatoresToXML(element);
+                        element = element.replace("__PLACEHOLDER_LIST_CONTENT__", "").trim();
+
                         return element
 
                         

@@ -176,7 +176,8 @@ function generateChapContent(content) {
         const result = content.map((data, index) => {
             if(index > 1){
                 if (data !== 'false') {
-                    const sanitizedItem = convertOperatoresToXML(data);
+                    let sanitizedItem = convertOperatoresToXML(data);
+                    sanitizedItem = sanitizedItem.replace("__PLACEHOLDER_LIST_CONTENT__", "").trim();
                     const generatedData = (sanitizedItem !== "undefined") ?`<p>${sanitizedItem}</p>`:'';
 
                     return generatedData;
@@ -505,7 +506,7 @@ function generateAppendix(ChapValue: any) {
         const text = ChapValue.key.trim();
         const heading = text.split(" ")[0];
         const sectionNumber = heading ? text.split(" ")[1] : text.split(" ")[0];
-        const appendixName = ChapValue?.value[0];
+        const appendixName = ChapValue?.value[0].replace("__PLACEHOLDER_LIST_CONTENT__", "");
         const generateBookShortCode = `${bookShortCode}_AppxE_SecE`;
         const generatedContent = generateContent(ChapValue.value, generateBookShortCode);
 
