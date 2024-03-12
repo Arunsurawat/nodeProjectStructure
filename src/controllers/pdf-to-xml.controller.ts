@@ -12,7 +12,7 @@ import { findTOC, removeTOC } from '@utils/findTableOfContent'
 import { generateChapterSection } from "@/utils/chapaterSection";
 import { generateAllDataArray } from "@/utils/generateAllDataArray";
 import { generateTocContent } from "@/helper/generateTocContent";
-import { configrationCheck, configrationSetBookName, getAllPTagData,bookShortCode ,setBookShortCode, setBookTitle, convertOperatoresToXML} from "@/helper/common";
+import { configrationCheck, getAllPTagData,bookShortCode ,setBookShortCode, setBookTitle, convertOperatoresToXML, bookTitle} from "@/helper/common";
 import { generateChapterData } from "@/helper/generateChapterData";
 declare module 'express' {
     interface Request {
@@ -180,7 +180,7 @@ class PdfToXmlController {
                 
                     const newData = tocData?.TOC?.P.join()
                    
-                    const bookName = configrationSetBookName(withoutTOCAllPTagData); 
+                    const bookName = bookTitle
 
                     const regexPattern = /\s*\.\s*\.\s*(?=[a-zA-Z\d]+)/g;
                     let outputArray = newData && newData.split(regexPattern).map((segment, index) => {
@@ -198,7 +198,7 @@ class PdfToXmlController {
                         element = element.replace("TABLE OF CONTENTS ", "").trim();
                         element = element.replace(/\.(?!\d)|[,]/g, '').trim();
                         // remove Book name in list
-                        element = element.replace((bookName).toUpperCase(), "")
+                        element = element.replace((bookName), "")
                         element = convertOperatoresToXML(element);
                         element = element.replace("__PLACEHOLDER_LIST_CONTENT__", "").trim();
 
@@ -313,7 +313,7 @@ class PdfToXmlController {
                     // const snatizeXml = generatedChapterData && generatedChapterData.forEach(element => {
                     //     return element.unescapeXml;
                     // });
-                    const finalXML = `<?xml version="1.0" encoding="UTF-8"?>
+                    let finalXML = `<?xml version="1.0" encoding="UTF-8"?>
                         <!DOCTYPE iccxml SYSTEM "iccxml.dtd">
                         <iccxml
                             xmlns="http://www.w3.org/1999/xhtml"
@@ -335,8 +335,10 @@ class PdfToXmlController {
                                         ${generatedChapterData}
                                     </section>
                                 </section>
+                                </section>
                             </body>
                     </iccxml>`;
+                    finalXML = finalXML.replace(/>\s*,\s*</g, '><')
                     // console.log({ finalXML })
 
                     // Set headers for file download
