@@ -523,9 +523,6 @@ function generateAppendix(ChapValue: any) {
         return `
                 <header>
                 <h1 class="appendix" epub:type="title"><span class="label" epub:type="label">APPENDIX</span><span class="appendix_number" epub:type="ordinal">${sectionNumber}</span><br/><span class="appendix_title" epub:type="title">${appendixName}</span></h1>
-                <div class="help">
-                <span class="bold">The provisions contained in this appendix are not mandatory unless specifically referenced in the adopting ordinance.</span>
-                </div>
                 </header>
                ${finalContent}
             `
