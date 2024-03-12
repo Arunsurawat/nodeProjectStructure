@@ -73,14 +73,15 @@ class PdfToXmlController {
     public createXml = (req: Request, res: Response, next: NextFunction) => {
         try {
             let uploadedFile = req.file  as UploadedFile;
-            if (!uploadedFile) {
-                return res.status(400).json({ error: 'No  file uploaded.' });
-            }
+           
             if(!req.body.bookShortCode){
                 return res.status(400).json({ error: 'bookShortCode : This field is required.' });
             }
             if(!req.body.bookTitle){
                 return res.status(400).json({ error: 'bookTitle : This field is required.' });
+            }
+            if (!uploadedFile) {
+                return res.status(400).json({ error:  'File : This field is require.' });
             }
             setBookShortCode(req.body.bookShortCode);
             setBookTitle(req.body.bookTitle)
